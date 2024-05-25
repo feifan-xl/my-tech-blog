@@ -1,0 +1,18 @@
+{
+  "name": "my-algorithm-grove",
+  "version": "1.0.0",
+  "description": "A presonal repository dedicated to the exploration and mastery of alorithmic",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs",
+    "build:menu": "node ./build-menu.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vitepress": "^1.2.0"
+  }
+}
