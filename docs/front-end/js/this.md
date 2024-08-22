@@ -14,8 +14,9 @@ sidebarDepth: 2
     - 直接调用 指向调用的函数
     - call apply 指向绑定的对象
     - bind 永久的绑定到bind的第一个参数
-  - 匿名函数 匿名函数的执行环境有全局性，指向window(???)
+  - 匿名函数 匿名函数的执行环境有全局性，指向window
   - new 指向实例
+
 
 
 ## bind rules
@@ -34,9 +35,10 @@ sidebarDepth: 2
     - `call(this, arg1, arg2, ...)`
   - arrow function -> 编译时绑定
   - html event element bind -> target element
+  - super: 以 super.method() 的形式被调用时，method中的this指向super被调用时的this指向
 
 
-## explicit bind polifill
+## bind apply call
 
 ### apply
 
@@ -77,23 +79,5 @@ sidebarDepth: 2
       return function (...arg2) { 
         return fn.apply(context, [...args, ...arg2])
       }
-    }
-  ```
-
-## new bind
-
-在`JavaScript`中，`new`操作符用于创建一个给定构造函数的实例对象 
-
-执行了以下步骤: 
-  1. 创建一个空对象 
-  2. 绑定原型 
-  3. 绑定this 
-  4. 返回新对象 
-
-  ```js
-    function newObject (context, ...args) {
-      const obj = Object.create(context.prototype)
-      let res = context.call(obj, ...args)
-      return typeof res === 'object' && res != null ? res : obj
     }
   ```

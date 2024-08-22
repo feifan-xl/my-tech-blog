@@ -5,6 +5,7 @@ sidebarDepth: 2
 
 ## prototype
 
+每个对象都会有一个私有属性指向另一个名为原型的对象
 原型: 每个js对象(除null)在创建时会关联另一个对象，并从这个对象继承部分属性,这个对象就是原型
 
 
@@ -113,3 +114,42 @@ sidebarDepth: 2
   }
   ```
 
+
+
+
+## new
+
+
+### polyfill
+
+在`JavaScript`中，`new`操作符用于创建一个给定构造函数的实例对象 
+
+执行了以下步骤: 
+  1. 创建一个空对象 
+  2. 绑定原型 
+  3. 绑定this 
+  4. 返回新对象 
+
+  ```js
+    function newObject (context, ...args) {
+      const obj = Object.create(context.prototype)
+      let res = context.call(obj, ...args)
+      return typeof res === 'object' && res != null ? res : obj
+    }
+  ```
+
+### new.target
+
+检测函数或构造方法是否是通过new运算符被调用的
+
+```
+function Foo() {
+  if (!new.target) throw "Foo() must be called with new";
+  console.log("Foo instantiated with new");
+}
+
+Foo(); // throws "Foo() must be called with new"
+new Foo(); // logs "Foo instantiated with new"
+```
+
+在构造函数中使用，指向被 new 的函数

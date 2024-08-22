@@ -262,6 +262,7 @@ Object.prototype.toString.call(xx) 实现原理
 
 2. 判断是否是NaN
   - isNaN(NaN)
+  - Object.is(NaN, NaN)
   - NaN !== NaN
 
 3. isNaN 与 Number.isNaN 的区别
@@ -289,7 +290,9 @@ Object.prototype.toString.call(xx) 实现原理
 
 ### shallow clone
 
-1. `Object.assign(target, source)`  
+1. `Object.assign(target, source)`
+    - 基本类型会被封装， null undefined被忽略
+    - 原型链上的属性和不可枚举的属性不能被复制
 2. 针对数组
     - `Array.prototype.slice`
     - `Array.prototype.concat`
@@ -311,7 +314,7 @@ Object.prototype.toString.call(xx) 实现原理
 ### deep clone
 
 
-#### JSON.stringify()
+1. JSON.stringify()
 
   ```js
   const obj2=JSON.parse(JSON.stringify(obj1));
@@ -319,7 +322,7 @@ Object.prototype.toString.call(xx) 实现原理
 
 但是这种方式存在弊端，会忽略`undefined`、`symbol`和`函数`
 
-#### traverse recursion
+2. traverse recursion
 
   ```js
     function deepClone (obj, hash = new WeakMap()) {
@@ -359,3 +362,19 @@ function 也是一种对象，有对象的部分特点:
       new Function('a, b', 'return a + b')
       new Function(['a', 'b'], 'return a + b')
     ```
+
+## 6. equal
+
+三种方式：
+1. ==
+2. ===
+3. Object.is()
+
+区别:
+1. `==` 将执行类型转换，对不同类型的比较对象进行boolean转换, 转换流程见上
+2. `===` 不进行类型转换， 如果类型不同，直接返回false
+3. `Object.is()` 即不做类型转换， 也不对 -0，0 NaN等进行特殊处理
+```js
+Object.is(NaN, NaN) // true
+Object.is(0, -0) // false
+```

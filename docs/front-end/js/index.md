@@ -11,4 +11,3 @@ sidebar: false
 - [prototype.md](./prototype.md)
 - [scoped.md](./scoped.md)
 - [this.md](./this.md)
-- [widget.md](./widget.md)
