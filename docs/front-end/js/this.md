@@ -38,6 +38,29 @@ sidebarDepth: 2
   - super: 以 super.method() 的形式被调用时，method中的this指向super被调用时的this指向
 
 
+*例*
+```js
+var value = 1;
+
+var foo = {
+  value: 2,
+  bar: function () {
+    return this.value;
+  }
+}
+
+//示例1
+console.log(foo.bar());
+//示例2
+console.log((foo.bar)());  // (foo.bar) 未重新计算
+//示例3
+console.log((foo.bar = foo.bar)()); // 已重新计算 
+//示例4
+console.log((false || foo.bar)());
+//示例5
+console.log((foo.bar, foo.bar)());
+```
+
 ## bind apply call
 
 ### apply

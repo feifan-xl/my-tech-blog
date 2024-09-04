@@ -1,5 +1,30 @@
 
-## 性能优化
+# 性能优化
+
+## 性能指标
+
+性能是对网站或应用程序的客观度量和用户的体验  
+主要包括：
+- 减少总体负载时间
+- 尽快使网站可用
+- 流畅性和可交互性
+- 感知性能： 用户所体验到的，是网站看起来有多快，而不是网站实际有多快
+- 性能测量 实际速度和感知速度
+
+
+Navigation Timing API and Lighthouse Performance
+
+感知性能
+Lighthouse Performance:
+1. TTFB(time to First Byte) 浏览器接收第一个字节的时间
+2. FP(first paint) 首次内容绘制，仅有一个div根节点
+3. FCP(first content paint) 首次有内容的绘制，页面基本框架，但没有数据
+4. FMP(first meaning paint) 首次有意义的绘制
+5. TTI:Time To interactive 可交互时间
+6. Long tasks:超过50ms的任务
+7. SSR && CSR:服务端渲染和客户端渲染
+8. Isomorphic JS:同构化
+
 
 ## debounce & throttle
 
@@ -98,21 +123,9 @@ function throttle (fn, time) {
     ```
 
 
+
+
 ## 减少白屏时间 
-
-### 性能指标
-
-Navigation Timing API and Lighthouse Performance
-
-Lighthouse Performance:
-1. TTFB(time to First Byte) 浏览器接收第一个字节的时间
-2. FP(first paint) 首次内容绘制，仅有一个div根节点
-3. FCP(first content paint) 首次有内容的绘制，页面基本框架，但没有数据
-4. FMP(first meaning paint) 首次有意义的绘制
-5. TTI:Time To interactive 可交互时间
-6. Long tasks:超过50ms的任务
-7. SSR && CSR:服务端渲染和客户端渲染
-8. Isomorphic JS:同构化
 
 ### 加载慢原因及方案
 
@@ -211,23 +224,108 @@ preload、prefetch 均能设置、命中缓存；
 
 
 
-## 
-
-### 性能
-
-性能是对网站或应用程序的客观度量和用户的体验  
-主要包括：
-- 减少总体负载时间
-- 尽快使网站可用
-- 流畅性和可交互性
-- 感知性能： 用户所体验到的，是网站看起来有多快，而不是网站实际有多快
-- 性能测量 实际速度和感知速度
 
 
-#### 感知性能
-主要有：
+
+## lazy loading & async loading
+
+## 重排 & 重绘
+
+### 触发
+*重排*
+文档结构发生变化，元素大小发生变化
+- 页面的首次渲染
+- 浏览器的窗口大小发生变化
+- 元素的内容发生变化
+- 元素的尺寸或者位置发生变化
+- 元素的字体大小发生变化
+- 激活CSS伪类
+- 查询某些属性或者调用某些方法
+- 添加或者删除可见的DOM元素
+
+
+*重绘*
+外观变化时 如color opacity等 不影响文档流的位置
+- color、background 相关属性
+- outline 相关属性：outline-color、outline-width 、text-decoration
+- border-radius、visibility、box-shadow
+
+
+### 解决方案
+
+- 对 DOM 进行批量写入和读取（通过虚拟 DOM 或者 DocumentFragment 实现）。
+- 避免对样式频繁操作，了解常用样式属性触发 Layout / Paint / Composite 的机制，合理使用样式。
+- 合理利用特殊样式属性（如 transform: translateZ(0) 或者 will-change），将渲染层提升为合成层，开启 GPU 加速，提高页面性能。
+- 使用变量对布局信息（如 clientTop）进行缓存，避免因频繁读取布局信息而触发重排和重绘。
+- 需要多次重排的元素 positon 为absolute fixed， 脱离文档流，就不回影响其他元素
+- display none
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## h5 秒开
+
+### 关键指标和大体优化方向
+
+- 容器启动
+    - 容器预建
+- 白屏
+- 页面加载
+    - 网络建连优化
+    - 资源离线化
+    - 资源分级下发
+    - 资源预加载
 - FP
-- FCP
-- FMP
-- LCP  最大内容绘制时间
-- TTI  可交互时间
+- 代码执行
+- 数据获取
+    - 数据预取
+    - 数据缓存
+- 绘制渲染
+- LCP
+
+
+*容器创建*
+1. 容器预建
+  - 容器初始化时间不同， 冷启数百ms 热启数十ms
+
+*资源加载*
+- 网络建连优化：优化网络连接，让解析更快、链路更短
+  - DNS 预解析
+  - CDN
+- 资源离线化：使用本地资源，直接省去网络请求
+  - 更新策略: 紧急更新 轮询更新 冷启更新
+  - 动态查分: bsdiff更新， 版本离线包差异
+  - 签名校验: 校验资源是否被篡改
+  - 在线CDN
+- 资源分级下发：根据机型信息差异化分发离线包，减少包体积
+  - 静态资源分级
+  - 业务代码分级
+- 资源预加载：在当前页面空闲状态加载下一页面资源
+  - ```<link rel="prefetch" href="/images/big.jpeg" />```
+
+*代码执行*
+- JS AOT化
+
+*数据获取*
+- 数据预取, 在webview初始化的同时 获取数据 
+  - 通用方案
+    - scheme 参数配置
+    - json维护
+    - worker 运行时 
+  
+
+*数据缓存*
+
+*绘制渲染*
