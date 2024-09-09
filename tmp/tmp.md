@@ -25,3 +25,10 @@
 - CLS 累积布局偏移，衡量页面的视觉稳定性 ？？？
 
 https://segmentfault.com/blog/sasasa
+
+
+
+
+globalThis 与window
+
+esbuild

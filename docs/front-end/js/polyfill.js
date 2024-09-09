@@ -1,659 +1,609 @@
+
 // 目录
-// 01. Object.assign
-// 02. deep clone & shadow clone
-// 03. inheritance
-// 04. apply bind call
-// 05. new 
-// 06. currying
-// 07. onion
-// 08. promise
-// 09. generator to async
-// 10. list and tree
-// 11. object create & assign
-// 12. debounce & throttle
-// 13. Array
-
-// 01. object.assign
-  // k1: source 为数组
-  // k2: Object.keys()
-  // k3: getOwnPropertySymbols and enumerable
-  function completeAssgin(target, ...source) {
-    source.forEach(i => {
-      const descriptors = Object.keys(i).reduce((acc, cur) => {
-        acc[cur] = Object.getOwnPropertyDescriptor(i, keys)
-        return acc;
-      }, {})
-
-      Object.getOwnPropertySymbols(i).forEach(sym => {
-        const descriptor = Object.getOwnPropertyDescriptor(i, sym)
-        if (descriptor.enumerable) {
-          descriptors[sym] = descriptor
-        }
-      })
-      Object.defineProperties(target, descriptors);
-    })
-    return target;
-  }
+// 1. Object -> create assign
+// 2. instanceof
+// 3. deep clone & shadow clone
+// 4. inheritance and prorotype
+// 5. apply bind call
+// 6. new 
+// 7. currying
+// 8. onion
+// 9. promise
+// 10. generator to async
+// 11. Array reduce flat
 
 
-// 02. deep clone & shadow clone
-
-  function deepClone (obj, map = new WeakMap()) {
+// 01. Object -> create assign
+  class Polyfill01 {
     
-    if (typeof obj !== 'object' || obj === null) {
-      return obj
-    }
-    if (map.has(obj)) {
-      return map.get(obj)
-    }
-    let res = Array.isArray(obj) ? [] : {};
-    for (let key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        res[key] = deepClone(obj[key])
-      }
-    }
-    map.set(obj, res)
-    return res;
-  }
-
-
-// 03. inheritance
-  function Polyfill03 () {
-
-    function Animal () {}
-    function Cat() {}
-  
-    // 03-01 原型继承
-    function Cat () {}
-    Cat.prototype = new Animal();
-  
-    // 03-02 构造函数
-    function Cat () {
-      Animal.call(this)
-    }
-    cat = new Cat();
-
-    // 03-03 组合寄生
-    function Cat() {
-      Animal.call(this)
-    }
-    // Cat.prototype = Object.create(Animal.prototype)
-    // Cat.prototype.constructor = Cat
-    (function () {
-      let Super = function () {}
-      Super.prototype = Animal.prototype
-      Cat.prototype = new Super();
-      Cat.prototype.constructor = Cat
-    })();
-  
-    // 03-04 class
-    class Cat extends Animal {
-      constructor() {
-        super();
-      }
-      methods () { }
-    }
-  
-  }
-
-
-
-// 04. apply bind call
-
-  // 04.01 apply
-  fn.apply(this, [...a])
-  obj.prototype.myApply = function (context, params = []) {
-    if (typeof this !== 'function') throw new Error()
-    context = context || globalThis;
-    const fn = Symbol('fn');
-    context[fn] = this;
-    let res = context[fn](...params)
-    // delete context[fn];
-    Reflect.deleteProperty(context, fn)
-    return res;
-  }
-
-  // 04.02 call
-  fn.call(this, a, b, c)
-  Function.prototype.myCall = function(context, ...params) {
-    if (typeof this !== 'function') throw new Error()
-    context = context || globalThis;
-    const fn = Symbol();
-    context[fn] = this;
-    let res = context[fn](...params);
-    Reflect.deleteProperty(context, fn);
-    return res;
-  }
-
-  // 04.03 bind
-  fn.bind(this, a, b)(c)
-  a = fn.bind(this, a,b)
-  b = new a();
-
-  Function.prototype.bind = function (context, ...arg1) {
-    context = context || globalThis;
-    const fn = this;
-    function boundFunction (...arg2) {
-      if (this instanceof boundFunction) {
-        return new fn(...arg1, ...arg2)
-      }
-      return fn.apply(context, [...arg1, ...arg2]);
-    }
-    boundFunction.prototype = fn.prototype
-    return boundFunction;
-  }
-
-// 05. new 
-  // 1. create new object and bind prototype
-  // 2. bind this
-  // 3. return new object
-  a = new Fn(...args)
-  function newObject (constructorFn, ...args) {
-    // const obj = {};
-    // obj.prototype = constructorFn.prototype
-    const obj = Object.create(constructorFn.prototype)
-    let res = constructorFn.call(obj, ...args)
-    return (typeof res === 'object' && res != null)
-      ? res
-      : obj
-  }
-
-
-// 06. currying
-
-  // 06.01 common currying
-  function currying (fn, ...arg1) {
-    return function (...arg2) {
-      return fn.call(fn, ...arg1, ...arg2)
-    }
-  }
-
-  // 06.02 toString
-  add(1)(2)(5) == 10;
-  function add (...arg1) {
-    let arg = [...arg1]
-    let _add = function (...arg2) {
-      arg = [...arg, ...arg2]
-      return _add
-    }
-    _add.toString = function () {
-      return arg.reduce((a, b) => a * b, 1)
-    }
-    return _add;
-  }
-
-  // 06.03 toString + function.length
-  const multiFn = (a, b, c, d) => a * b * c * d
-  const multi = curry(multiFn)
-  multi(1)
-  multi(12)
-  multi(13)
-  multi(14)
-
-  function curry (fn, ...arg1) {
-    let arg = [...arg1]
-    const res = function (...arg2) {
-      arg =[...arg, ...arg2]
-      if (arg.length == fn.length) {
-        return fn.call(fn, ...arg)
-      }
-      else {
-        return res
-      }
-    }
-    return res
-  }
-  
-  // 06.04 compose
-  function compose (...fns) {
-    return function (arg) {
-      return fns.reduce((res, fn) => {
-        return fn.call(fn, res)
-      }, arg)
-    }
-  }
-  const composeSi =(...fns)=>
-     arg =>
-       fns.reduce((res, fn) => fn.call(fn, res), arg)
-  
-  let add3 = x => x + 3;
-  let mul2 = x => x * 2;
-  composeSi(mul2, add3)(2);// -> 7
-
-// 07. onion
-
-  function Polyfill07 () {
-    class Onion {
-      constructor () {
-        this.middlewares = [];
-      }
-      use (middleware) {this.middlewares.push(middleware)}
-
-      async execute(ctx) {
-        let len = this.middlewares.length;
-        const execute = async idx => {
-          if (idx < len) {
-            await this.middlewares[idx](ctx, () => execute(idx + 1))
-          }
-        }
-        await execute(0)
-      }
-    }
-    const middleware1 = async (ctx, next) => {
-      console.log('m1 start')
-      ctx.value += 1;
-      await new Promise(res => setTimeout(res(2), 1000))
-      await next();
-      console.log('m1 end')
-    }
-    const middleware2 = async (ctx, next) => {
-      console.log('m2 start')
-      ctx.value += 1;
-      next();
-      console.log('m2 end')
-    }
-    const middleware3 = async (ctx, next) => {
-      console.log('m3 start')
-      ctx.value += 1;
-      next();
-      console.log('m3 end')
-    }
-  
-    const onion = new Onion();
-    onion.use(middleware1)
-    onion.use(middleware2)
-    onion.use(middleware3)
-  
-    const ctx = { value: 0 }
-    onion.execute(ctx).then(() => {
-      console.log(ctx, 'final')
-    })
-  }
-
-// 08. promise
-
-  class MyPromise {
-    static P = 'pending';
-    static F = 'fulifilled';
-    static R = 'rejected';
-
-    constructor (executor) {
-      this.state = MyPromise.P;
-      this.value = undefined;
-      this.error = undefined;
-      this.fulifilledCb = [];
-      this.rejectedCb = [];
-
-      const resolve = value => {
-        if (this.state === MyPromise.P) {
-          this.state = MyPromise.F;
-          this.value = value;
-          this.fulifilledCb.forEach(cb => cb(value))
-        }
-      }
-
-      const reject = error => {
-        if (this.state === MyPromise.P) {
-          this.state = MyPromise.R
-          this.error = error;
-          this.rejectedCb.forEach(cb => cb(error))
-        }
-      }
-      try {
-        executor(resolve, reject)
-      } catch (e) {
-        reject(e)
-      }
-    }
-    
-    then (onFulfilled, onRejected) {
-      let promise2 = new MyPromise((resolve, reject) => {
-        onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : i => i;
-        onRejected = typeof onRejected === 'function' ? onRejected : error => new Error(error)
-
-        const handleResolve = () => {
-          queueMicrotask(() => {
-            try {
-              const x = onFulfilled(this.value);
-              // resolve(x)
-              MyPromise.resolvePromise(promise2, x, resolve, reject);
-            } catch (e) {
-              reject(e)
-            }
-          })
-        };
-        const handleRejected = () => {
-          try {
-            const x = onRejected(this.error)
-            MyPromise.resolvePromise(promise2, x, resolve, reject)
-          } catch (e) {
-            reject(e)
-          }
-        };
-
-        if (this.state === MyPromise.F) {
-          handleResolve();
-        }
-        else if (this.state === MyPromise.R) {
-          handleRejected();
-        }
-        else {
-          this.fulifilledCb.push(handleResolve);
-          this.rejectedCb.push(handleRejected);
-        }
-      })
-      return promise2
-    }
-
-    static resolvePromise (promise2, x, resolve, reject) {
-      if (x === promise2) return new Error('circle')
-      let called = false
-      if ((typeof x === 'object' || typeof x === 'object') && x !== null) {
-        try {
-          let then = x.then;
-          if (typeof then === 'function') {
-            then.call(
-              x,
-              value => {
-                if (called) return;
-                called = true
-                resolve(value)
-              },
-              error => {
-                if (called) return;
-                called = true
-                reject(error)
-              },
-            )
-          }
-          else {
-            if (called) return;
-            called = true
-            resolve(x)
-          }
-        }
-        catch (e) {
-          if (called) return;
-          called = true
-          reject(e)
-        }
-      }
-      else {
-        if (called) return;
-        called = true
-        resolve(x)
-      }
-    }
-
-    static all (promiseList) {
-      if (!promiseList[Symbol.iterator]) {
-        return reject(new TypeError(' object is not iterable'))
-      }
-      return new MyPromise((resolve, reject) => {
-        let len = promiseList.length;
-        if (len === 0) return resolve([])
-        let resultCounter = 0;
-        let result = Array(len)
-        for (let i = 0; i < len; i++) {
-          Promise.resolve(promiseList[i])
-            .then(res => {
-              result[i] = res;
-              resultCounter++;
-              if (resultCounter == len) {
-                resolve(result)
-              }
-            })
-            .catch(e => reject(e))
-        }
-      })
-    }
-
-    static race (promiseList) {
-      return new MyPromise((resolve, reject) => {
-        if (!promiseList[Symbol.iterator]) {
-          return reject(new TypeError(' object is not iterable'))
-        }
-        for (const promise of promiseList) {
-          MyPromise.resolve(promise)
-            .then(resolve)
-            .catch(reject)
-        }
-      })
-    }
-
-    static resolve (i) {
-      return new MyPromise(resolve => {
-        resolve(i)
-      })
-    }
-
-    static reject (i) {
-      return new MyPromise((_, reject) => {
-        reject(i)
-      })
-    }
-    
-    static allSettled (promises) {
-      return new MyPromise((resolve, reject) => {
-        if (!promises[Symbol.iterator]) {
-          return reject(new TypeError('can not iterator'))
-        }
-        let counter = 0;
-        let len = promises.length;
-        let result = Array(len)
-        for (let i = 0; i < len; i++) {
-          Promise.resolve(promises[i])
-            .then(res => {
-              result[i] = {
-                status: MyPromise.F,
-                value: res,
-              }
-              counter++;
-              if (counter === len) {
-                resolve(result)
-              }
-            })
-            .catch(e => {
-              result[i] = {
-                status: MyPromise.R,
-                reason: e,
-              }
-              counter++;
-              if (counter === len) {
-                resolve(result)
-              }
-            })
-        }
-      })
-    }
-  }
-
-  const promise = new MyPromise((res, rej) => {
-    setTimeout(() => res('success'), 1000)
-    // res('111')
-  })
-
-  promise.then(value => {
-    console.log(value);
-    return value + ' then cb'
-  }).then(i => console.log(i))
-  Promise.resolve(2).then(i => console.log(222))
-
-
-// 09. generator to async
-  function Polyfill09 () {
-
-    const getData1 = () => new Promise(res => setTimeout(() => res(1), 1000));
-    const getData2 = () => new Promise(res => setTimeout(() => res(2), 1000));
-    
-    function* testG () {
-      const data1 = yield getData1();
-      console.log('data1', data1);
-      const data2 = yield getData2();
-      console.log('data2', data2)
-      return 'success';
-    }
-    
-    const gen = asyncToGen(testG)
-    gen.then(i => console.log(i))
-
-    function asyncToGen (genFn) {
-      return new Promise((resolve, reject) => {
-        let gen = genFn();
-        function step(type, arg) {
-          let next;
-          try {
-            next = gen[type](arg);
-          } catch(e) {
-            reject(e)
-          }
-          if (next.done) return resolve(next.value);
-          // 通过包装返回值， 获取promose.reoslve的值
-          Promise.resolve(next.value)
-            .then(res => step('next', res))
-            .catch(err => step('throw', err))
-        }
-        step('next')
-      })
-    }
-  }
-
-
-// 10. list and tree
-  function Polyfill10 () {
-    const list = [
-      { pid: 2, id: 4, data: "3-1" },
-      { pid: 1, id: 2, data: "2-1" },
-      { pid: null, id: 1, data: "1" },
-      { pid: 1, id: 3, data: "2-2" },
-      { pid: 3, id: 5, data: "3-2" },
-      { pid: 4, id: 6, data: "4-1" },
-    ]
-
-    const listToTree = list => {
-      let map = {};
-      let res = [];
-      list.forEach(i => {
-        map[i.id] = i;
-        i.children = []
-      })
-      list.forEach(i => {
-        if (i.pid == null) {
-          res.push(i)
-        }
-        else {
-          map[i.pid].children.push(i)
-        }
-      })
-      return res
-    }
-    const TreeToList = tree => {
-      let res = [];
-      let tmp = tree;
-      while (tmp.length > 0) {
-        const item = tmp.shift();
-        if (item.children) {
-          tmp.push(...item.children)
-        }
-        delete item.children
-        res.push(item)
-      }
-      return res
-    }
-    const tree = listToTree(list)
-    const list1 = TreeToList(tree);
-  }
-
-// 11. Object 
-  class MyObject {
-    constructor () {}
-
-    static create (proto, propotiesObject) {
-      if (typeof proto !== 'object' && typeof proto != 'function') {
-        throw new TypeError('Object prototype only be an object')
+    /**
+     * 
+     * @param {*} proto 
+     * @param {*} prototypeObj 
+     * @returns 
+     */
+    create (proto, prototypeObj) {
+      if (typeof proto != 'object' && typeof proto != 'function') {
+        throw new TypeError('must be object')
       }
       function F () {};
-      F.prototype = proto
+      F.prototype = proto;
       const res = new F();
-      if (propotiesObject) {
-        Object.defineProperties(res, propotiesObject)
+      if (prototypeObj) {
+        Reflect.defineProperties(res, prototypeObj)
       }
       return res;
     }
 
-    static assign (target, ...source) {
-      if (target === null || target === undefined) {
-        throw new TypeError('')
+    /**
+     * 
+     * @param {*} target 
+     * @param  {...any} sources 
+     * @returns 
+     */
+    assign (target, ...sources) {
+      sources.forEach(source => {
+        const descriptors = Object.keys(source).reduce((acc, cur) => {
+          acc[cur] = Object.getOwnPropertyDescriptor(source, cur)
+        }, {})
+
+        Object.getOwnPropertySymbols(source).forEach(sym => {
+          const descriptor = Object.getOwnPropertyDescriptor(source, sym);
+          if (descriptor.enumerable) {
+            descriptors[sym] = descriptor
+          }
+        })
+        Object.defineProperties(target, descriptors)
+      })
+      return target
+    }
+
+  }
+
+
+// 2. instanceof
+  class Polyfill02 {
+    instanceof (instance, targetConstructor) {
+      let proto = Object.getPrototypeOf(instance);
+      let target = targetConstructor.prototype;
+      while (true) {
+        if (proto == null) return false
+        if (proto == target) return true
+        proto = Object.getPrototypeOf(proto)
       }
-      const res = Object(target);
-      source.forEach(i => {
-        if (i !== null && i !== undefined) {
-          for (let key in i) {
-            if (Object.hasOwnProperty.call(i, key)) {
-              res[key] = i[key]
+    } 
+  }
+
+
+// 3. deep clone & shadow clone
+  class Polyfill03 {
+    
+    shadowClone (obj) {
+      if (typeof obj !== 'object' || obj === null) {
+        return obj
+      }
+      let res = Array.isArray(obj) ? [] : {};
+      for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          res[key] = obj[key]
+        }
+      }
+      return res
+    }
+
+    deepClone (obj, map = new WeakMap()) {
+      if (typeof obj != 'object' || obj === null) {
+        return obj
+      }
+      if (map.has(obj)) {
+        return map.get(obj)
+      }
+      let res = Array.isArray(obj) ? [] : {};
+      for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          res[key] = this.deepClone(obj[key])
+        }
+      }
+      map.set(obj, res)
+      return res;
+    }
+  }
+
+
+// 4. inheritance and prorotype
+  function Polyfill04 () {
+
+    const Animal = function () {};
+    Animal.prototype.methodA = () => console.log('a');
+
+    // 4.1 原型继承
+    function fn41 () {
+      const Cat = function () {}
+      // Cat.prototype = Animal.prototype
+      Cat.prototype = new Animal();
+    }
+
+    // 4.2 构造函数继承
+    function fn42 () {
+      const Cat = function () {
+        Animal.call(this)
+      }
+    }
+
+    // 4.3 组合继承
+    function fn43 () {
+      function Cat () {
+        Animal.call(this)
+      }
+      // Cat.prototype = Object.create(Animal.prototype);
+      // Cat.prototype.constructor = Cat
+      (function () {
+        function Super () {};
+        Super.prototype = new Animal();
+        Cat.prototype = new Super();
+        Cat.prototype.constructor = Cat
+      })();
+      const cat = new Cat()
+    }
+    
+    // 4.4 class
+    class Cat extends Animal {
+      constructor () {
+        super();
+      }
+      methodB () {}
+    }
+  }
+
+
+// 5. apply bind call
+  class Polyfill05 {
+
+    static apply (context, args) {
+      if (typeof context !== 'function') throw new TypeError('be called must be function');
+      context = context || globalThis;
+      
+      const fn = Symbol('fn')
+      context[fn] = this;
+      const res = context.fn(...args);
+      delete context[fn]
+      return res;
+    }
+
+    static call (context, ...args) {
+      if (typeof context !== 'function') throw new TypeError('be called must be function');
+      context = context || globalThis
+      const fn = Symbol('fn');
+      context[fn] = this;
+      const res = context[fn](...args);
+      Reflect.deleteProperty(context, fn)
+      return res
+    }
+
+    static bind (context, ...arg1) {
+      context = context || globalThis;
+      const fn = this;
+      const boundFunction = function (...arg2) {
+        const arg = [...arg1, ...arg2]
+        // if (new.target == boundFunction) {
+        if (this instanceof boundFunction) {
+          return new fn(...arg)
+        }
+        return fn.apply(context, arg)
+      }
+      return boundFunction;
+    }
+  }
+
+// 6. new 
+  class Polyfill06 {
+
+    static new (constructor, ...args) {
+      // let obj = {};
+      // obj.prototype = constructor.prototype
+      let obj = Object.create(constructor.prototype);
+      let res = constructor.call(obj, ...args);
+      return typeof res === 'object' && res !== null
+        ? res
+        : obj;
+    }
+  }
+
+// 7. currying
+  class Polyfill07 {
+
+    static currying (fn, ...arg1) {
+      return function (...arg2) {
+        return fn.call(fn, ...arg1, ...arg2)
+      }
+    }
+
+    // add(1)(2)(3) == 6
+    // add(2)(5,4) == 40
+    static add (...arg1) {
+      let args = [...arg1];
+      let _add = function (...arg2) {
+        args = [...args, ...arg2]
+        return _add
+      }
+      _add.toString = function () {
+        return args.reduce((acc, cur) => acc + cur, 0)
+      }
+      return _add;
+    }
+
+    // const multiFn = (a, b, c, d) => a * b * c * d
+    // const multi = curry(multiFn)
+    // multi(1, 2)
+    // multi(12, 3)
+    static curry (fn, ...arg1) {
+      let args = [...arg1]
+      const _fn = function (...arg2) {
+        args = [...args, ...arg2]
+        if (args.length == fn.length) {
+          return fn.call(fn, ...args)
+        }
+        return _fn;
+      }
+      return _fn;
+    }
+  
+    // let add3 = x => x + 3;
+    // let mul2 = x => x * 2;
+    // composeSi(mul2, add3)(2);// -> 7
+    static compose (...fn) {
+      return arg => fn.reduce((res, f) => f.call(f, res), arg)
+    }
+  }
+
+
+// 8. onion
+  class Polyfill08 {
+    static fn () {
+      class Onion {
+        constructor () {
+          this.middlewares = [];
+        }
+        use (md) {
+          this.middlewares.push(md)
+        }
+
+        async execute (ctx) {
+          let len = this.middlewares.length;
+          const execute = async id => {
+            if (id < len) {
+              await this.middlewares[id](ctx, () => execute(id + 1))
             }
           }
+          await execute(0);
         }
+      }
+
+      const middleware1 = async function (ctx, next) {
+        console.log('md 1 start')
+        ctx.value += 1
+        await next();
+        console.log('md 1 end')
+      }
+      const middleware2 = async function (ctx, next) {
+        console.log('md 2 start')
+        ctx.value += 1
+        await next();
+        console.log('md 2 end')
+      }
+      const middleware3 = async function (ctx, next) {
+        console.log('md 3 start')
+        ctx.value += 1
+        await next();
+        console.log('md 3 end')
+      }
+
+      const onion = new Onion();
+      const ctx = { value: 1 };
+      onion.use(middleware1);
+      onion.use(middleware2);
+      onion.use(middleware3);
+      onion.execute(ctx).then(res => console.log(res, 'final'))
+    }
+  }
+
+// 9. promise
+
+  class Polyfill09 {
+
+    static demo () {
+      const promise = new Promise((res, rej) => {
+        console.log(1);
+        setTimeout(() => res(2), 1000)
       })
-      return res;
+      promise.then(i => {
+        console.log(i);
+        return i + 2
+      }).then(i => console.log(i));
+      Promise.resolve(1).then(i => console.log(i));
     }
-  }
 
-// 12. debounce & throttle
-  function Polyfill12 () {
-    const fn = (i) => console.log(1, i);
-    // debounce 防抖 ns内重新计时
-    function debounce (fn, time) {
-      let timer
-      return function (...arg) {
-        if (timer) {
-          clearTimeout(timer)
+    static code () {
+      class MyPromise {
+        static Pending = 'pending';
+        static Fullfilled = 'fullfiled';
+        static Rejected = 'rejected';
+        constructor (execute) {
+          this.value = null;
+          this.error = null;
+          this.state = MyPromise.Pending;
+          this.onFulfilledCbs = [];
+          this.onRejectedCbs = [];
+
+          function resolve (value) {
+            if (this.state === MyPromise.Pending) {
+              this.value = value;
+              this.state = MyPromise.Fullfilled;
+              this.onFulfilledCbs.forEach(cb => cb(value))
+            }
+          }
+          
+          function reject (error) {
+            if (this.state === MyPromise.Pending) {
+              this.error = error;
+              this.state = MyPromise.Rejected;
+              this.rejectedCb.forEach(cb => cb(error))
+            }
+          }
+          
+          try {
+            execute(resolve, reject)
+          }
+          catch (e) {
+            reject(e)
+          }
         }
-        timer = setTimeout(() => {
-          fn.call(fn, ...arg)
-          timer = null
-        }, time)
-      }
-    }
-    a = debounce(fn, 100);
-    a(11);
-    setTimeout(() => a(22), 200)
-    a(11);
 
+        then (onFulfilled, onRejected) {
+          const promise2 = new MyPromise((resolve, reject) => {
+            if (typeof onFulfilled !== 'function') onFulfilled = i => i;
+            if (typeof onRejected !== 'function') onRejected = error => { throw new Error(error) }
+            const handleResolve = () => {
+              queueMicrotask(() => {
+                try {
+                  const x = onFulfilled(this.value)
+                  MyPromise.resolvePromise(promise2, x, resolve, reject)
+                }
+                catch (e) {
+                  reject(e)
+                }
+              })
+            };
+            const handleRejected = () => {
+              queueMicrotask(() => {
+                try {
+                  const x = onRejected(this.error)
+                  MyPromise.resolvePromise(promise2, x, resolve, reject)
+                }
+                catch (e) {
+                  reject(e)
+                }
+              })
+            };
+            if (this.state === MyPromise.Pending) {
+              this.onFulfilledCbs.push(handleResolve);
+              this.onRejectedCbs.push(handleRejected);
+            }
+            else if (this.state === MyPromise.Fullfilled) {
+              handleResolve();
+            }
+            else if (this.state === MyPromise.Rejected) {
+              handleRejected();
+            }
+          })
+          return promise2
+        }
 
-    // throttle 节流 ns后再执行
-    function throlle (fn, time) {
-      let timer;
-      return function (...arg) {
-        if (timer) return 
-        timer = setTimeout(() => {
-          fn.call(fn, ...arg)
-          timer = null
-        }, 2000)
+        static resolvePromise (promise2, x, resolve, rejected) {
+          if (x == promise2) return new Error('');
+          let called = flase
+          if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
+            try {
+              let then = x.then;
+              if (typeof then === 'function') {
+                then.call(
+                  x,
+                  value => {
+                    if (called) return
+                    called = true
+                    resolve(value);
+                  },
+                  error => {
+                    if (called) return
+                    called = true
+                    rejected(error);
+                  }
+                )
+              }
+              else {
+                if (called) return
+                called = true
+                resolve(x)
+              }
+            }
+            catch(e) {
+              if (called) return
+              called = true
+              rejected(e)
+            }
+            return
+          }
+          if (called) return
+          called = true
+          resolve(x)
+        }
+
+        finally (onFinally) {
+          return this.then(
+            value => Promise.resolve(onFinally()).then(() => value),
+            reason => Promise.resolve(onFinally).then(() => {throw reason})
+          )
+        }
+
+        catch (onCatch) {
+          return this.then(null, onCatch)
+        }
+
+        static all (promises) {
+          if (!promises[Symbol.interator]) return MyPromise.reject(new TypeError(''));
+          return new MyPromise((resolve, rej) => {
+            let len = promises.length;
+            let res = [];
+            if (len == 0) return resolve(res);
+            let resCount = 0;
+            for (let i = 0; i < len; i++) {
+              MyPromise.resolve(promises[i])
+                .then(val => {
+                  res[i] = val;
+                  resCount++;
+                  if (resCount == len) {
+                    resolve(res);
+                  }
+                })
+                .catch(rej)
+            }
+          })
+        }
+
+        static race (promises) {
+          return new MyPromise((resolve, reject) => {
+            if (!promises[Symbol.interator]) return reject(new TypeError(''));
+            for (const promise of promises) {
+              MyPromise.resolve(promise)
+                .then(resolve, reject)
+            }
+          })
+        }
+
+        static resolve (i) {
+          return new MyPromise(res => res(i))
+        }
+
+        static reject (i) {
+          return new MyPromise((_, rej) => rej(i))
+        }
+
+        static allSettle (promises) {
+          return new MyPromise((resolve, reject) => {
+            if (!promises[Symbol.interator]) reject(new TypeError(''));
+            let len = promises.length;
+            let couter = 0;
+            let result = [];
+            const returnFn = () => {
+              couter++;
+              if (couter === len);
+              resolve(result);
+            };
+            for (let i = 0; i < len; i++) {
+              const promise = promises[i]
+              Promise.resolve(promise)
+                .then(value => {
+                  result[i] = {
+                    status: MyPromise.Fullfilled,
+                    value
+                  }
+                  returnFn();
+                })
+                .catch(reason => {
+                  result[i] = {
+                    status: MyPromise.Rejected,
+                    reason
+                  }
+                  returnFn();
+                })
+            }
+          })
+        }
       }
     }
   }
 
-// 13. Array
-  class MyArray {
-    constructor () {}
 
-    inclueds (ele) { }
+// 10. generator to async
+  class Polyfill10 {
+    
+    static demo () {
 
-    reduce (fn, init ) {
-      const arr = this;
-      let i = 0;
-      let acc = init;
-      if (acc === undefined) {
-        acc = arr[0];
-        i = 1;
+      let getData = (val, time) => new Promise(res => setTimeout(() => res(val), time));
+
+      async function fn () {
+        const data1 = await getData(1, 500);
+        console.log(`data1: ${data1}`);
+        const data2 = await getData(2, 1000)
+        console.log(`data2: ${data2}`)
+        return 'success'
       }
-      // fn((acc, cur, idx, arr) => {}, init)
-      for (; i < arr.length; i++) {
-        acc = fn.call(fn, acc, arr[i], i, arr)
-      }
-      return acc;
+      fn().then(i => console.log(i))
+      
     }
 
-    static flat () {}
+    static code () {
+      let getData = (val, time) => new Promise(res => setTimeout(() => res(val), time));
+      function * genFn (val) {
+        console.log(val)
+        const data1 = yield getData(1, 500);
+        console.log(`data1: ${data1}`);
+        const data2 = yield getData(2, 1000)
+        console.log(`data2: ${data2}`)
+        return 'success'
+      }
+      function asyncToGen (genFn, ...arg) {
+        return new Promise((res, rej) => {
+          let fn = genFn(...arg);
+          function step (type, arg) {
+            let next;
+            try {
+              next = fn[type](arg);
+            }
+            catch(e) {
+              rej(e)
+            }
+            const {value, done} = next;
+            if (done) return res(value);
+            Promise.resolve(value)
+              .then(value =>  step('next', value))
+              .catch(error => step('throw', error))
+          }
+          step('next');
+        })
+      }
+      const gen = asyncToGen(genFn, 11);
+      gen.then(i => console.log(i))
+    }
   }
+
+
+
+
+// 11. Array reduce flat
+  class Polyfill11 {
+    static code () {
+
+      class MyArray {
+        includes () {}
+
+        reduce (fn, init) {
+          // this.reduce((acc, cur, idx, arr) => {}, init)
+          const arr = this;
+          let i = 0;
+          let acc = init
+          if (init === undefined) {
+            i = 1;
+            acc = arr[0]
+          }
+          for (; i < arr.length; i++) {
+            acc = fn(acc, cur, i, arr)
+          }
+          return acc
+        }
+      }
+    }
+  }
+
+
+

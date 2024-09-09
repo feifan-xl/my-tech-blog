@@ -101,7 +101,7 @@ function throttle (fn, time) {
 1. 懒加载
     - img 标签的 loading 属性，lazy 在可见后加载， 兼容性ie否
     - intersection Observer API  兼容性
-    - scroll resize 等事件
+    - scroll resize 等事件,getBoundingClientRect API 获取元素图片距离视口顶部的距离
 2. 预加载
     - `<link rel="preload" as="image" href="important.png" />`  允许开发者在 HTML 的 head 标签中声明资源请求，指定页面需要预加载的资源，并且在浏览器的主要渲染机制启动之前加载，避免阻塞页面渲染且保证资源尽早可用
     - 动态场景

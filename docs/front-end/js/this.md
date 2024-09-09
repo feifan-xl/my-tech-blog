@@ -104,3 +104,35 @@ console.log((foo.bar, foo.bar)());
       }
     }
   ```
+
+
+
+## 优先级 
+
+- level 19
+  - 圆括号 ( … )
+- level 18 
+  - 成员访问 	… . …
+  - 需计算的成员 … [ … ]
+  - new（带参数列表） new … ( … )
+  - 函数调用 … ( … )
+  - 可选链 ?.
+- level 17
+  - new（无参数列表）new …
+
+```js
+function foo() {
+  getName = function () { console.log(1); };
+  return this;
+}
+foo.getName = function () { console.log(2); };
+foo.prototype.getName = function () { console.log(3); };
+var getName = function () { console.log(4); };
+function getName() { console.log(5); }
+new foo.getName();
+  // -> new (foo.getName)()
+new foo().getName();
+  // -> (new foo()).getName() 
+new new foo().getName();
+  // -> new ((new foo()).getName)()
+```
