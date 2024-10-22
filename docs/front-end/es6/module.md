@@ -3,7 +3,6 @@
 
 ## ESM
 
-
 静态加载，即编译时加载
 
 ### VS CommonJS

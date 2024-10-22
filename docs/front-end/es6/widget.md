@@ -165,53 +165,6 @@ let ab = Object.assign({}, a, b);
 
 
 
-### proxy
-
-ownKeys() 拦截对自身属性的读取操作:
-    - Object.getOwnPropertyNames()
-    - Object.getOwnPropertySymbols()
-    - Object.keys()
-    - for...in循环
-
-this: 指向 Proxy 代理
-
-
-## reflect
-
-设计目的：
-- 可以从 Reflect 对象上拿到语言内部的方法
-- 修改某些 Object 方法的返回结果
-  ```
-    // 老写法
-    try {
-      Object.defineProperty(target, property, attributes);
-      // success
-    } catch (e) {
-      // failure
-    }
-
-    // 新写法
-    if (Reflect.defineProperty(target, property, attributes)) {
-      // success
-    } else {
-      // failure
-    }
-  ```
-- 让 Object 的操作变成函数行为
-    ```
-    // 老写法
-    'assign' in Object // true
-
-    // 新写法
-    Reflect.has(Object, 'assign') // true
-    ```
-- Reflect 对象的方法与 Proxy 对象的方法一一对应，只要是 Porxy 对象的方法，Reflect 对象上就能找到对应的方法
-
-
-
-
-## generator
-
 ```js
 function* f() {
   for(var i = 0; true; i++) {

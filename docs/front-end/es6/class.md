@@ -1,33 +1,37 @@
 
 ## class
 
-1. 不存在变量提升 hoist
-2. name 属性
-3. 实例可添加 generator 方法
-4. this 默认指向类的实例， 可被 bing、解构等影响
-5. 
+特性:
+  1. 不存在变量提升 hoist
+  2. name 属性
+  3. 实例可添加 generator 方法
+  4. this 默认指向类的实例， 可被 bing、解构等影响
+
 
 
 ### 继承
-```js
-class Dog extends Animal {
-    constructor (name) {
-        super(name)
+*demo*
+  ```js
+    class Dog extends Animal {
+        constructor (name) {
+            super(name)
+        }
     }
-}
-```
+  ```
 - 子类的 `__proto__` 属性 表示构造的继承，总是指向父类
 - 子类prototype属性的`__proto__`属性，表示方法的继承，总是指向父类的prototype属性
-```
-class A {
-}
 
-class B extends A {
-}
+*demo2*
+  ```js
+    class A {
+    }
 
-B.__proto__ === A // true
-B.prototype.__proto__ === A.prototype // true
-```
+    class B extends A {
+    }
+
+    B.__proto__ === A // true
+    B.prototype.__proto__ === A.prototype // true
+  ```
 
 ### super
 

@@ -1,270 +1,227 @@
 
+
 ## promise
 
-异步编程的一种解决方案 
+用于处理异步操作的一种对象，表示一个未来可能会返回的值 
+
+使用更简洁的方式处理异步代码，避免传统的回调地域， 提高代码的可读性 
+
 
 特点:
-1. 状态不受外界影响
-2. 一旦改变就不会再变
-
-### then
-
-返回值为一个新的promise实例
+  1. 链式调用: 通过 then() 可依次执行多个异步任务
+  2. 避免回调地域: 异步代码更清晰
+  3. 状态不受外接影响，一旦改变就不会再变
 
 
-
-### 手写promise
+## polyfill
 
 主要功能:
-1. 基础框架 异步，三种状态
-2. then方法，主要promiseResolution
-3. promiseResolution，返回可能是promise对象 复杂对象 普通对象
+  1. base 
+    - 异步
+    - 三种状态
+  2. then 
+    - 链式调用 
+  3. promiseResolution
+    - 类型处理: promise,普通对象,引用对象
 
-#### base
+  4. other
 
-``` javascript
-function Promise (exector) {
-    this.state = 'pending'
-    this.onfulfilledCallback = []
-    this.onRejectedCallback = []
-    const self = this
-    function resolve (value) {
-        if (self.state === 'pending') {
-            self.state = 'fulfilled'
-            self.data = value
-            for (let i = 0; i < self.onfulfilledCallback.length; i++) {
-                self.onfulfilledCallback[i](value)
-            }
+*code*
+  ```js
+    class MyPromise {
+      static Pending = 'pending';
+      static Fullfilled = 'fullfiled';
+      static Rejected = 'rejected';
+      constructor (execute) {
+        this.value = null;
+        this.error = null;
+        this.state = MyPromise.Pending;
+        this.onFulfilledCbs = [];
+        this.onRejectedCbs = [];
+
+        function resolve (value) {
+          if (this.state === MyPromise.Pending) {
+            this.value = value;
+            this.state = MyPromise.Fullfilled;
+            this.onFulfilledCbs.forEach(cb => cb(value))
+          }
         }
-    }
-    
-    function reject (reason) {
-        self.state = 'rejected'
-        self.data = reason
-        self.onfulfilledCallback(reason)
-    }
-
-    try {
-        exector(resolve, reject)
-    }catch (reason) {
-        reject(reason)
-    }
-
-}
-```
-
-#### then 
-
-```javascript
-Promise.prototype.then = function (onFulfilled, onRejected) {
-    const self = this
-    let promise2
-    promise2 = new Promise(function (resolve, reject) {
-        if (self.state === 'fulfilled') {
-            if (typeof onFulfilled === 'function') {
-                try {
-                    const x = resolve(self.data)
-                    promiseResolution(promise2, x, resolve, reject)
-                } catch (e) {
-                    reject(e)
-                }
-            }else {
-                resolve(self.data)
-            }
-        } else if (self.state === 'rejected') {
-            if (typeof onRejected === 'function') {
-                try {
-                    const x = onRejected(self.data)
-                    promiseResolution(promise2, x, resolve, reject)
-                }catch(e) {
-                    reject(e)
-                }
-            }else {
-                reject(self.data)
-            }
-        } else if (self.state === 'pending') {
-            self.onfulfilledCallback.push(function (promise1Value) {
-                if (typeof onFulfilled === "function") {
-                  try {
-                    const x = onFulfilled(self.data);
         
-                    promiseResolutionProcedure(promise2, x, resolve, reject);
-                  } catch (e) {
-                    reject(e);
-                  }
-                } else {
-                  resolve(promise1Value);
-                }
-            })
-            self.onRejectedCallback.push(function (promise1Reason) {
-                if (typeof onRejected === "function") {
-                  try {
-                    const x = onRejected(self.data);
+        function reject (error) {
+          if (this.state === MyPromise.Pending) {
+            this.error = error;
+            this.state = MyPromise.Rejected;
+            this.rejectedCb.forEach(cb => cb(error))
+          }
+        }
         
-                    promiseResolutionProcedure(promise2, x, resolve, reject);
-                  } catch (e) {
-                    reject(e);
-                  }
-                } else {
-                  reject(promise1Reason);
-                }
-            })
-        }
-    })
-
-    return promise2
-}
-
-```
-
-#### prommiseResolution
-
-```javascript
-function promiseResolution (promise2, x, resolve, reject) {
-    if (promise2 === x) {
-        return reject(new TypeError("chaining cycle"))
-    }
-    // 如果也是promise对象
-    if (x instanceof Promise) {
-        if (x.state === 'pending') {
-            x.then(function (value) {
-                promiseResolution(promise2, value, resolve, reject)
-            }, reject)
-        } else if (x.state === 'fulfilled') {
-            resolve(x.data)
-        } else if (x.state === 'rejected') {
-            reject(x.data)
-        }
-        return;
-    }
-    // 如果是复制对象 需要执行下
-    if (x && (typeof x === 'object' || typeof x === 'function')) {
-        // 防止多次执行
-        let isCalled = false
         try {
-            let then = x.then
-            if ( typeof then === 'function') {
-
-                then.call(
-                    x,
-                    function resolvePromise (y) {
-                        if (isCalled) return
-                        isCalled = true
-                        return promiseResolution(promise2, y, resolve, reject)
-                    },
-                    function rejectPromise (r) {
-                        if (isCalled) return
-                        isCalled = true
-                        return reject(r)
-                    })
-            } else {
-                resolve(x)
-            }
-        } catch(e) {
-            if (isCalled) return
-            isCalled = true
-            reject(e)
+          execute(resolve, reject)
         }
-    } else {
-        resolve(x)
-    }
-}
-```
+        catch (e) {
+          reject(e)
+        }
+      }
 
-### promise 其他方法
-
-1. promise.all
-    - 参数可以不为数组，但是必须有Iterator接口，且每个成员都是promise实例
-    - 如果不是，就会调用promise.resolve方法转为promise实例
-2. promise.race
-3. promise.resolve, reject
-    - resolve
-        - 参数类型：
-            - promise 实例： 原封不动返回
-            - thenable 对象： 先转换为promise对象， 将其变为 resolved状态， 最后执行 then() 方法
-            - 无 then 方法 或不是对象： 直接返回新的promise对象，
-4. promise.finally
-5. promise.catch
-6. promise.allSettled() 确保所有的promise都完成，不考虑是否成功
-7. promise.any
-
-
-```javascript
-promise.all = function (promises) {
-    let result = []
-    let count = 0
-    return new Promise((resolve, reject) => {
-        promise.forEach((i, index) => {
-            Promise.resolve(i).then(
-                res => {
-                    reject[index] = res
-                    count++
-                    if (count === promises.length) {
-                        resolve(result)
-                    }
-                },
-                err => {
-                    reject(err)
-                }
-            )
+      then (onFulfilled, onRejected) {
+        const promise2 = new MyPromise((resolve, reject) => {
+          if (typeof onFulfilled !== 'function') onFulfilled = i => i;
+          if (typeof onRejected !== 'function') onRejected = error => { throw new Error(error) }
+          const handleResolve = () => {
+            queueMicrotask(() => {
+              try {
+                const x = onFulfilled(this.value)
+                MyPromise.resolvePromise(promise2, x, resolve, reject)
+              }
+              catch (e) {
+                reject(e)
+              }
+            })
+          };
+          const handleRejected = () => {
+            queueMicrotask(() => {
+              try {
+                const x = onRejected(this.error)
+                MyPromise.resolvePromise(promise2, x, resolve, reject)
+              }
+              catch (e) {
+                reject(e)
+              }
+            })
+          };
+          if (this.state === MyPromise.Pending) {
+            this.onFulfilledCbs.push(handleResolve);
+            this.onRejectedCbs.push(handleRejected);
+          }
+          else if (this.state === MyPromise.Fullfilled) {
+            handleResolve();
+          }
+          else if (this.state === MyPromise.Rejected) {
+            handleRejected();
+          }
         })
-    })
-}
+        return promise2
+      }
 
-```
-
-```js
-promise.race = function (promiseList) {
-    return new Promise((resolve, reject) => {
-        for (let i = 0; i < promiseList.length; i++) {
-            promise.resolve(promiseList(i)).then(
-                res => resolve(res),
-                req => reject(req)
-            )
+      static resolvePromise (promise2, x, resolve, rejected) {
+        if (x == promise2) return new Error('');
+        let called = flase
+        if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
+          try {
+            let then = x.then;
+            if (typeof then === 'function') {
+              then.call(
+                x,
+                value => {
+                  if (called) return
+                  called = true
+                  resolve(value);
+                },
+                error => {
+                  if (called) return
+                  called = true
+                  rejected(error);
+                }
+              )
+            }
+            else {
+              if (called) return
+              called = true
+              resolve(x)
+            }
+          }
+          catch(e) {
+            if (called) return
+            called = true
+            rejected(e)
+          }
+          return
         }
-    })
-}
+        if (called) return
+        called = true
+        resolve(x)
+      }
 
+      finally (onFinally) {
+        return this.then(
+          value => Promise.resolve(onFinally()).then(() => value),
+          reason => Promise.resolve(onFinally).then(() => {throw reason})
+        )
+      }
 
-```
+      catch (onCatch) {
+        return this.then(null, onCatch)
+      }
 
+      static all (promises) {
+        if (!promises[Symbol.interator]) return MyPromise.reject(new TypeError(''));
+        return new MyPromise((resolve, rej) => {
+          let len = promises.length;
+          let res = [];
+          if (len == 0) return resolve(res);
+          let resCount = 0;
+          for (let i = 0; i < len; i++) {
+            MyPromise.resolve(promises[i])
+              .then(val => {
+                res[i] = val;
+                resCount++;
+                if (resCount == len) {
+                  resolve(res);
+                }
+              })
+              .catch(rej)
+          }
+        })
+      }
 
+      static race (promises) {
+        return new MyPromise((resolve, reject) => {
+          if (!promises[Symbol.interator]) return reject(new TypeError(''));
+          for (const promise of promises) {
+            MyPromise.resolve(promise)
+              .then(resolve, reject)
+          }
+        })
+      }
 
+      static resolve (i) {
+        return new MyPromise(res => res(i))
+      }
 
-> 待完成
-1. promise 与 generator 结合
+      static reject (i) {
+        return new MyPromise((_, rej) => rej(i))
+      }
 
-```
-function getFoo () {
-  return new Promise(function (resolve, reject){
-    resolve('foo');
-  });
-}
-
-const g = function* () {
-  try {
-    const foo = yield getFoo();
-    console.log(foo);
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-function run (generator) {
-  const it = generator();
-
-  function go(result) {
-    if (result.done) return result.value;
-
-    return result.value.then(function (value) {
-      return go(it.next(value));
-    }, function (error) {
-      return go(it.throw(error));
-    });
-  }
-
-  go(it.next());
-}
-
-run(g);
-```
+      static allSettle (promises) {
+        return new MyPromise((resolve, reject) => {
+          if (!promises[Symbol.interator]) reject(new TypeError(''));
+          let len = promises.length;
+          let couter = 0;
+          let result = [];
+          const returnFn = () => {
+            couter++;
+            if (couter === len);
+            resolve(result);
+          };
+          for (let i = 0; i < len; i++) {
+            const promise = promises[i]
+            Promise.resolve(promise)
+              .then(value => {
+                result[i] = {
+                  status: MyPromise.Fullfilled,
+                  value
+                }
+                returnFn();
+              })
+              .catch(reason => {
+                result[i] = {
+                  status: MyPromise.Rejected,
+                  reason
+                }
+                returnFn();
+              })
+          }
+        })
+      }
+    }
+  ```

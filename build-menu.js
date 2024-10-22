@@ -5,6 +5,7 @@ const path = require('path');
 function isIneffective(name) {
   return ['.vitepress', 'index.md'].includes(name)
    || name.includes('.png')
+   || name.includes('imgs')
    || name.includes('.html')
    || name.includes('.js');
 }

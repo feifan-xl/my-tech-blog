@@ -137,6 +137,7 @@
 4. 装饰器
     - 代码服用，使方法或者类得到增强 
 5. 常见的工具类型
+	```
     - Partial<T>：将类型 T 的所有属性变为可选属性。
     - Required<T>：将类型 T 的所有属性变为必选属性。
     - Readonly<T>：将类型 T 的所有属性变为只读属性。
@@ -147,6 +148,8 @@
     - Extract<T, U>：从类型 T 中提取类型 U 中存在的所有属性。
     - NonNullable<T>：从类型 T 中移除 null 和 undefined。
     - ReturnType<T>：获取函数类型 T 的返回值类型。
+	```
 6. unknown 不可预先定义的类型
-    - 经常使用 `(a as unknown as string)`
-    - 声明时 与 any 相视 `const foo: unknown = 'string';`
+    - 经常使用 ```(a as unknown as string)```
+    - 声明时 与 any 相视 ```const foo: unknown = 'string';```
+

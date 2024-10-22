@@ -4,7 +4,7 @@
   "description": "A presonal repository dedicated to the exploration and mastery of alorithmic",
   "main": "index.js",
   "scripts": {
-    "dev": "vitepress dev docs",
+    "dev": "vitepress dev docs --host",
     "docs:build": "vitepress build docs",
     "docs:serve": "vitepress serve docs",
     "build:menu": "node ./build-menu.js"

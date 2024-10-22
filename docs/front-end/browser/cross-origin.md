@@ -1,20 +1,18 @@
----
-sidebarDepth: 2
----
 
-## why
+
+## 起因
 
 浏览器 为了请求安全而引入的基于同源策略的安全特性
-
-可嵌入跨域资源的:
-- 使用 <script src="…"></script> 标签嵌入的 JavaScript 脚本。语法错误信息只能被同源脚本中捕捉到。
-- 使用 <link rel="stylesheet" href="…"> 标签嵌入的 CSS。由于 CSS 的松散的语法规则，CSS 的跨源需要一个设置正确的 Content-Type标头。如果样式表是跨源的，且 MIME 类型不正确，资源不以有效的 CSS 结构开始，浏览器会阻止它的加载。
-- 通过 <img> 展示的图片。
-- 通过 <video> 和 <audio> 播放的多媒体资源。
-- 通过 <object> 和 <embed> 嵌入的插件。
-- 通过 @font-face 引入的字体。一些浏览器允许跨源字体（cross-origin fonts），另一些需要同源字体（same-origin fonts）。
-- 通过 <iframe> 载入的任何资源。站点可以使用 X-Frame-Options 标头来阻止这种形式的跨源交互。
-
+```
+  可嵌入跨域资源的:
+    - 使用 <script src="…"></script> 标签嵌入的 JavaScript 脚本。语法错误信息只能被同源脚本中捕捉到。
+    - 使用 <link rel="stylesheet" href="…"> 标签嵌入的 CSS。由于 CSS 的松散的语法规则，CSS 的跨源需要一个设置正确的 Content-Type标头。如果样式表是跨源的，且 MIME 类型不正确，资源不以有效的 CSS 结构开始，浏览器会阻止它的加载。
+    - 通过 <img> 展示的图片。
+    - 通过 <video> 和 <audio> 播放的多媒体资源。
+    - 通过 <object> 和 <embed> 嵌入的插件。
+    - 通过 @font-face 引入的字体。一些浏览器允许跨源字体（cross-origin fonts），另一些需要同源字体（same-origin fonts）。
+    - 通过 <iframe> 载入的任何资源。站点可以使用 X-Frame-Options 标头来阻止这种形式的跨源交互。
+```
 ##  解决方案
 
 ### cors
@@ -82,4 +80,3 @@ JSONP 的原理是利用了浏览器加载 JavaScript 资源文件时不受同�
 - Websocket 不受同源策略影响
 - webview调用scheme
   - 非标准浏览器发起的http请求，通过应用的特定接口处理 
-- 

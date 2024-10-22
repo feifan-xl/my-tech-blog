@@ -1,6 +1,3 @@
----
-sidebarDepth: 2
----
 
 
 ## prototype
@@ -10,15 +7,15 @@ sidebarDepth: 2
 
 
 其中:
-  - `__proto__` 实例->原型对象
-  - `constructor` 原型对象->构造函数
-  - `prototype` 构造函数->原型对象
-  - `new` 构造函数->实例
+  - `new` 构造函数 -> 实例
+  - 实例 `__proto__` -> 原型对象
+  - 原型对象 `constructor` -> 构造函数
+  - 构造函数 `prototype` -> 原型对象
 
 函数: 
   ```js
     function doSomething(){}
-    // console
+    // -> console
     {
         constructor: ƒ doSomething(),
         __proto__: {
@@ -36,99 +33,109 @@ sidebarDepth: 2
 
 关系图如下:
 
-![图片](./prototype.png)
-
+![图片](./imgs/prototype.png)
 
 ## prototype chain
 
-查找流程: ```person -> Person.prototype -> Object.prototype -> null``` 
+*原型链*
+原型间，对象继承时的链状关系
 
-原型链: 原型间组成的链状结构
+*查找规则*
+- 实例本身查找属性找不到时，去原型上查看
+- 原型上找不到，去原型的原型上查找
+- 直到 找到 或 查到 null
+如: ```person -> Person.prototype -> People.prototype -> Object.prototype -> null```
 
-在读取实例的属性时,如果查找不到,就会查找与之关联的原型的对象上的属性，继续查找原型对象的原型对象,知道查到或者查到`null`  
+## operate
 
-
-## operate prototype
-
-构造函数与原型之间的关系:
-  ```
+构造函数、实例、原型关系
+  ```js
     Person(constructor) -> new -> person(instance)
     person(instance) -> __proto__ -> Person.prototype(prototype)
     Person(constructor) —> prototype -> Person.prototype(prototype)
     Person.prototype(prototype) -> constructor -> Person(constructor)
   ```
 
-1. 查找原型
-  - `__proto__` deprecated
+*查找原型*
+  - `__proto__`
   - `Object.getPrototypeOf(obj)`
   - `Reflect.getPrototypeOf(obj)`
-2. 设置原型
+
+*设置原型*
   - `new`
-  - `Object.create()`
+  - `Object.create(proto, propertiesObject)`
   - `Object.setPrototypeOf(obj)`
   - `Reflect.setPrototypeOf(obj)`
+
 
 ## inheritance
 
 ### es5
 
+1. 原型继承
   ```js
-  // 1. 原型继承
-  function Cat (name) {}
-  Cat.prototype = new Animal()
-
-  // 2. 构造函数继承
-  function Cat (name) {
-    Animal.call(this, name)
-  }
-  var cat = new Cat('name')
-
-  // 3. 组合寄生继承
-  // 借用构造函数来继承属性，使用混合式原型链继承方法
-
-  function Cat (name) {
-    Animal.call(this, name)
-  }
-
-  (function () {
-    let Super = function () {}
-    Super.prototype = Animal.prototype
-    Cat.prototype = new Super()
-    Cat.prototype.constructor = Cat
-  })()
+    function Cat (name) {}
+    Cat.prototype = new Animal()
+  ```
+2. 构造函数继承
+  ```js
+    function Cat (name) {
+      Animal.call(this, name)
+    }
+    var cat = new Cat('name')
+  ```
+3. 组合-es5
+  ```js
+    function Cat (name) {
+      Animal.call(this, name)
+    }
+    (function () {
+      let Super = function () {}
+      Super.prototype = Animal.prototype
+      Cat.prototype = new Super()
+      Cat.prototype.constructor = Cat
+    })()
+  ```
+4. 组合-es6
+  ```js
+    function Cat (name) {
+      Animal.call(this, name)
+    }
+    Cat.prototype = Object.create(Animal.prototype);
+    Cat.prototype.constructor = Cat;
   ```
 
 ### es6
 
   ```js
-  class Animal {
-    constructor (name) {
-      this.name = name
+    class Animal {
+      constructor (name) {
+        this.name = name
+      }
     }
-  }
-
-  class Cat extends Animal {
-    constructor (name) {
-      super(name)
+  
+    class Cat extends Animal {
+      constructor (name) {
+        super(name)
+      }
     }
-  }
   ```
 
-
-
-
 ## new
-
-
-### polyfill
 
 在`JavaScript`中，`new`操作符用于创建一个给定构造函数的实例对象 
 
 执行了以下步骤: 
   1. 创建一个空对象 
-  2. 绑定原型 
+  2. 绑定原型
+    - 如果构造函数的原型是对象 那么绑定这个对象
+    - 否则指向 Object.prototype
   3. 绑定this 
   4. 返回新对象 
+    - 非原始值 或者 newInstance
+
+
+### polyfill new
 
   ```js
     function newObject (context, ...args) {
@@ -141,15 +148,16 @@ sidebarDepth: 2
 ### new.target
 
 检测函数或构造方法是否是通过new运算符被调用的
+- 在普通函数中调用 为undefined
+- 在箭头函数中，指向最近的外层函数new.target
+- 在构造函数中使用，指向被 new 的函数, 非继承的对象
 
-```
-function Foo() {
-  if (!new.target) throw "Foo() must be called with new";
-  console.log("Foo instantiated with new");
-}
+  ```js
+    function Foo() {
+      if (!new.target) throw "Foo() must be called with new";
+      console.log("Foo instantiated with new");
+    }
 
-Foo(); // throws "Foo() must be called with new"
-new Foo(); // logs "Foo instantiated with new"
-```
-
-在构造函数中使用，指向被 new 的函数
+    Foo(); // throws "Foo() must be called with new"
+    new Foo(); // logs "Foo instantiated with new"
+  ```
