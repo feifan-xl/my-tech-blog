@@ -1,19 +1,21 @@
----
-sidebarDepth: 2
----
 
-## 1. base type and complex type
+
+## 基本类型和复杂类型
 
 在 `js` 中,数据类型可分为两类:
-- 基本类型
+- 基本类型(原始值)
 - 复杂类型(引用类型)
 
-两者区别为存储位置不同 
+两者区别为存储位置不同
+<!-- todo 涉及js运行 -->
 
 
-### base type
+### 基本类型
+又称 原始值，主要特性:
+- 不可变
+- 可使用 typeof进行测试
 
-主要有以下
+*主要类型*
 - Number
 - String
 - Boolean
@@ -22,10 +24,9 @@ sidebarDepth: 2
 - symbol
 - bigint
 
+### 复杂类型(引用类型)
 
-### complex type
-
-又称 `引用类型`, 本质都是 `Object`
+本质都是 `Object`:
 - Object
 - Array
 - Function
@@ -34,17 +35,37 @@ sidebarDepth: 2
 - Map
 - ...
 
-#### Array
+#### function 
 
-#### ArrayLike 
+function 也是一种对象，有对象的部分特点:  
+  - name
+  - length 返回函数入参的个数
+  - 可以增加自定义属性
 
-  类数组对象，就是指可以通过索引属性访问元素并且拥有 length 属性的对象  
-  常见的 arguments对象, DOM NodeList对象...
 
-  类数组无法使用 forEach、splice、push 等数组原型链上的方法  
+调用方式`new Function`
+- 使用场景: 根据重网络或其他地方获取的字符串,动态创建函数  
+- 使用限制: 只能访问全局变量,无法访问`outer function`中的变量
+- 语法: 
+  ```js
+    new Function('a', 'b', 'return a + b')
+    new Function('a, b', 'return a + b')
+    new Function(['a', 'b'], 'return a + b')
+  ```
 
-  类数组转换为数组  
 
+#### ArrayLike Object
+
+*什么是类数组对象:*
+- 拥有 length 熟悉，以数字为键的属性，看起来像数组
+- 没有数组的原生方法，如 push pop 等
+- 并不是真正的数组
+
+*典型的类数组:*
+- argumnets
+- NodeList (document.querySelectorAll)
+
+*转换成数组*
   ```js
     Array.prototype.slice.call(arguments)
     Array.from(arrayLikeObj)
@@ -52,7 +73,8 @@ sidebarDepth: 2
     [].concat.apply([], arrayLikeObj)
   ```
 
-### different between base and complex
+
+### 区别
 
 
 1. 声明变量时不同的内存地址分配：
@@ -63,77 +85,85 @@ sidebarDepth: 2
   - 复杂类型赋值，是将保存对象的内存地址赋值给另一个变量。也就是两个变量指向堆内存中同一个对象
 
 
-## 2.type conversion
 
-常见的类型转换:
-- 强制转换(显示转换)
-- 自动转换(隐式转换)
+## 类型转换
 
-### display conversion
+分为两种:
+- 强制转换(显示)
+- 自动转换(隐式)
 
-即使用了相应类型转换功能的API, 常见的:
-- Number()
-- parseInt()
+*强制转换* 使用了对应类型转换API，如:
+- Number(), parseInt()
 - String()
 - Boolean()
 
+**
 
-#### Number()
 
+### 显示
 
+*Number()*
 ```js
-Number(324) // 324
-Number('324') // 324
-Number('324abc') // NaN
-Number('') // 0
-Number(true) // 1
-Number(false) // 0
-Number(undefined) // NaN
-Number(null) // 0
-Number({a: 1}) // NaN
-Number([1, 2, 3]) // NaN
-Number([5]) // 5
-// Symbol -> Throw a TypeError
-// Object -> 先调用toPrimitive, 再调用toNumber
-```
-从上面可以看到，`Number`转换的时候是很严格的，只要有一个字符无法转成数值，整个字符串就会被转为`NaN`
-
-#### parseInt()
-
-```js
-parseInt('32a3') //32
+  Number(324) // 324
+  Number('324') // 324
+  Number('324abc') // NaN
+  Number('') // 0
+  Number(true) // 1
+  Number(false) // 0
+  Number(undefined) // NaN
+  Number(null) // 0
+  Number({a: 1}) // NaN
+  Number([1, 2, 3]) // NaN
+  Number([5]) // 5
+  // Symbol -> Throw a TypeError
+  // Object -> 先调用toPrimitive, 再调用toNumber
 ```
 
-
-#### String()
-
+*parseInt(), parseFloat()*
 ```js
-String({a: 1}) // "[object Object]"
-String([1, 2, 3]) // "1,2,3"
+  parseInt('32a3') //32
+  parseInt('123.45');   // 123
+  parseFloat('123.45'); // 123.45
+```
+
+*String()*
+```js
+  String(123);       // '123'
+  String(true);      // 'true'
+  String(null);      // 'null'
+  String(undefined); // 'undefined'
+  String({a: 1}) // "[object Object]"
+  String([1, 2, 3]) // "1,2,3"
+```
+
+*toString()* 适用于非null undefined
+```js
+  (123).toString();  // '123'
+```
+
+*Boolean*
+```js
+  Boolean(1);         // true
+  Boolean(0);         // false
+  Boolean('');        // false
+  Boolean('hello');   // true
+  Boolean(null);      // false
+  Boolean(undefined); // false
+  Boolean([]);        // true
+  Boolean({});        // true
+  Boolean(new Boolean(false)) // true
+  Boolean(NaN) // false
 ```
 
 
-#### Boolean()
-
-```js
-Boolean(NaN) // false
-Boolean('') // false
-Boolean({}) // true
-Boolean([]) // true
-Boolean(new Boolean(false)) // true
-```
-
-
-### implicit conversion
+### 隐式转换
 
 归纳为两种情况发生隐式转换的场景：
 
 - 比较运算（`==`、`!=`、`>`、`<`）、`if`、`while`需要布尔值地方
 - 算术运算（`+`、`-`、`*`、`/`、`%`）
 
-
-
-#### auto conversion to boolean
+#### 自动转换为 boolean
 
 
 - undefined 
@@ -146,7 +176,7 @@ Boolean(new Boolean(false)) // true
 
 除了上面几种会被转化成`false`，其他都换被转化成`true`
 
-#### auto conversion to string
+#### 自动转换为 string
 
 ```js
 '5' + 1 // '51'
@@ -158,7 +188,9 @@ Boolean(new Boolean(false)) // true
 '5' + undefined // "5undefined"
 '5' + null // "5null"
 ```
-#### auto conversion to number
+
+#### 自动转换为 number
+
 
 除了`+`有可能把运算子转为字符串，其他运算符都会把运算子自动转成数值
 
@@ -177,57 +209,64 @@ undefined + 1 // NaN
 
 `null`转为数值时，值为`0` 。`undefined`转为数值时，值为`NaN`
 
-### valueof & toString
+### valueOf and toString
 
-toString: 返回反映这个对象的字符串 如: `'[object Array]'`
+*toString* 获取对象的字符串表示, 如 `'[object Array]'`
+*valueOf* 获取对象的原始值
 
-valueOf: 返回它相应的原始值 
-  - 如果 已经是原始类型， 就不需要转换
-  - 先调用 valueof 如果返回结果不是 string 再调用toString 
-  - 如果都没有返回原始类型， 就会报错
+调用方式:
+- 隐式：在运算符进行运算时，先调用 valueOf, 如果没有则调用toString
 
-- 在进行对象运算时，将优先调用 toString 方法，如若没有重写 toString 方法，则会调用 valueOf 方法；如果两个方法都没有重写，则会调用 Object 上面的 toString
-- 当进行强制类型转换时，如果转换成字符串则会调用 toString ，转换成数字则会调用 valueOf
-- 使用运算符进行运算时，valueOf 的优先级高于 toString
-
-#面试题分析
+*相关示例*
 ```js
-a = function () {}
-a.valueOf = function () {return 1}
-a == 1 // true
-
+let myObj = {
+  name: 'Alice',
+  toString() {
+    return `My name is ${this.name}`;
+  },
+  valueOf() {
+    return 42;
+  }
+};
+console.log(myObj.toString());  // 'My name is Alice'
+console.log(myObj.valueOf());   // 42
+// 隐式调用 valueOf() (在数学运算中)
+console.log(myObj + 8);         // 50
+myObj == 42 
 ```
-### traverse
 
-#### object
+## 遍历
+
+### object
 
 *遍历属性*  
 
-  1. 常用的遍历方式, 
-    - `for...in` 遍历属性 会变量对象的整个原型链 
-    - `Object.keys` 自身可遍历对象的值的集合
-    - `Object.entries` 遍历自身可枚举属性的键值对
-  2. 遍历所有， 包括不可枚举属性  
-    - `Object.getOwnPropertyNames(obj)` `getOwnPropertySymbols`  
-    - `Object.getOwnPropertyDescriptors()`  
-    - `Reflect.ownKeys(obj)`  
+1. 常用的遍历方式,
+  - `for...in` 遍历属性 会变量对象的整个原型链 
+  - `Object.keys` 自身可遍历对象的值的集合
+  - `Object.entries` 遍历自身可枚举属性的键值对
+2. 遍历所有， 包括不可枚举属性  
+  - `Object.getOwnPropertyNames(obj)` `getOwnPropertySymbols`  
+  - `Object.getOwnPropertyDescriptors()`  
+  - `Reflect.ownKeys(obj)`  
 
-    
 *遍历值*
 
   - `Object.values`
   - `Object.entries`
 
 
-#### array
+
+### array
 
 1. forEach, map ...
 2. `for...in`
 3. `for...of` 不仅支持数组,还支持类数组,也支持字符串遍历
 
-## 3.check type
 
-通常的检查方法: 
+## 类型检测
+
+### 常用检查方法
 
 1. typeof 
   可分辨基本数据类型(null 除外)， 引用类型都为 `object`
@@ -245,23 +284,25 @@ a == 1 // true
     Object.prototype.toString.call({}) // '[object Object]'
   ```
 
-Object.prototype.toString.call(xx) 实现原理
+*Object.prototype.toString.call(xx)* 实现原理
   - 若参数(xx)不为 null 或 undefined，则将参数转为对象，再作判断
   - 转为对象后，取得该对象的 [Symbol.toStringTag] 属性值（可能会遍历原型链）作为 tag，然后返回 "[object " + tag + "]" 形式的字符串。
 
-### problem
+
+### 特殊方式
 
 1. 数组的检查
   ```js
-  Object.prototype.toString.call([]) === '[object Array]'
-  [].__proto__ === Array.prototype
-  Array.isArray([])
-  [] instanceof Array
-  Array.prototype.isPrototypeOf([])
+    Object.prototype.toString.call([]) === '[object Array]'
+    [].__proto__ === Array.prototype
+    Array.isArray([])
+    [] instanceof Array
+    Array.prototype.isPrototypeOf([])
   ```
 
 2. 判断是否是NaN
   - isNaN(NaN)
+  - Object.is(NaN, NaN)
   - NaN !== NaN
 
 3. isNaN 与 Number.isNaN 的区别
@@ -280,16 +321,21 @@ Object.prototype.toString.call(xx) 实现原理
   基本类型是没有属性和方法的 , 但是为了便于操作, 调用基本类型的属性或方法时  会隐私的转换为对象  
 
 6. Object.is
-  ```JS
-  Object.is(NaN, NaN) // true
-  Object.is(NaN, 0/0) // true
+  ```js
+    Object.is(NaN, NaN) // true
+    Object.is(NaN, 0/0) // true
   ```
-  
-## 4.copy
 
-### shallow clone
 
-1. `Object.assign(target, source)`  
+
+
+## 拷贝
+
+### 浅拷贝
+
+1. `Object.assign(target, source)`
+    - 基本类型会被封装， null undefined被忽略
+    - 原型链上的属性和不可枚举的属性不能被复制
 2. 针对数组
     - `Array.prototype.slice`
     - `Array.prototype.concat`
@@ -308,19 +354,15 @@ Object.prototype.toString.call(xx) 实现原理
       return newObj
     }
   ```
-### deep clone
 
-
-#### JSON.stringify()
-
+### 深拷贝
+1. JSON.stringify()
   ```js
   const obj2=JSON.parse(JSON.stringify(obj1));
   ```
-
 但是这种方式存在弊端，会忽略`undefined`、`symbol`和`函数`
 
-#### traverse recursion
-
+2. traverse recursion
   ```js
     function deepClone (obj, hash = new WeakMap()) {
       if (obj instanceof Date) return new Date(obj);
@@ -340,22 +382,19 @@ Object.prototype.toString.call(xx) 实现原理
     }
   ```
 
-## 5. function object
+## equal
 
-function 也是一种对象，有对象的部分特点:  
-  - name
-  - length 返回函数入参的个数
-  - 可以增加自定义属性
+判断是否相等:
+1. `==`
+2. `===`
+3. `Object.is(a, b)`
 
-### new Function
 
-- 使用场景: 根据重网络或其他地方获取的字符串,动态创建函数  
-
-- 使用限制: 只能访问全局变量,无法访问`outer function`中的变量
-
-- 语法: 
-    ```js
-      new Function('a', 'b', 'return a + b')
-      new Function('a, b', 'return a + b')
-      new Function(['a', 'b'], 'return a + b')
-    ```
+区别:
+1. `==` 将执行类型转换，对不同类型的比较对象进行boolean转换, 转换流程见上
+2. `===` 不进行类型转换， 如果类型不同，直接返回false
+3. `Object.is()` 即不做类型转换， 也不对 -0，0 NaN等进行特殊处理
+  ```js
+    Object.is(NaN, NaN) // true
+    Object.is(0, -0) // false
+  ```
