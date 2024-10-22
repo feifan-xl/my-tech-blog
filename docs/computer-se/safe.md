@@ -110,32 +110,32 @@ demo: 表单输入 `<script src >` 然后回来执行
 
 ### 解密
 
-ssl劫持伪造证书 -> ssl剥离 将https降级为http转给用户使用 
+- ssl劫持伪造证书
+- ssl剥离
+- 将https降级为http转给用户使用 
 
 
 ### 防范
 
-对开发者:
+- 对开发者:
   - 支持https
-  - 开启 hsts (Http strict transport security) 策略，有个缺点是用户首次访问时因还未收到 HSTS 响应头而不受保护
-
-对用户：
-  - 尽可能是用https
-  - 避免不知名不安全wifi
-  - 不忽略不安全的浏览器通知
-  - 公共网络下不进行涉及敏感信息交互
-  - 用可信的第三方CA厂商，不下载不明来源的证书
-
-
+  - 开启 hsts 策略，有个缺点是用户首次访问时因还未收到 HSTS 响应头而不受保护
+- 对用户
+  - 尽可能是用 https  
+  - 避免不知名不安全wifi  
+  - 不忽略不安全的浏览器通知 
+  - 公共网络下不进行涉及敏感信息交互 
+  - 用可信的第三方CA厂商
+  - 不下载不明来源的证书 
 
 ## other
 
 ### 点击劫持
 
-http header: ```X-Frame-Options```
-  - DENY: 始终禁止在 frame 中显示此页面，即便是同域名下的页面也不允许嵌套。
-  - SAMEORIGIN: 只允许与页面同源的<iframe>中显示页面。
-  - ALLOW-FROM url: 允许指定域的<iframe>中显示页面（已废弃，不推荐使用）
+*http header*: ```X-Frame-Options```
+  - DENY: 始终禁止在 iframe 中显示此页面，即便是同域名下的页面也不允许嵌套。
+  - SAMEORIGIN: 只允许与页面同源的iframe中显示页面。
+  - ALLOW-FROM url: 允许指定域的iframe中显示页面（已废弃，不推荐使用）
 
 ### CDN 劫持
 
