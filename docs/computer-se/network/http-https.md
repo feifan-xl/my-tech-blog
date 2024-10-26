@@ -40,23 +40,21 @@
 301 永久重定向 资源永久移动
 302 临时重定向 资源暂时移动 
 
-相同:
-- 都会在响应头里使用字段 Location 指明后续需要跳转的url，浏览器会自动重定向到新的url 
-- post请求都会被浏览器转为get请求 
+相同: 
+  - 都会在响应头里使用字段 Location 指明后续需要跳转的url，浏览器会自动重定向到新的url 
+  - post请求都会被浏览器转为get请求 
 
 *缓存时间*
-301 不同浏览器处理不同 chrome默认永久缓存 safari重启后清除
-302 默认不缓存
-都可以在指定 cache-control expires时 设置缓存
+- 301 不同浏览器处理不同 chrome默认永久缓存 safari重启后清除
+- 302 默认不缓存
+- 都可以在指定 cache-control expires时 设置缓存
 
 *seo*
-- 301 会抓取定向后的 并保存新网址
-- 302 会抓取定向后的内容 但是还会将网址保存为原网址
-- 安全问题 302会保存原有地址， 可能出现网址劫持 
-
-
-- 307 临时重定向
-- 308 永久重定向
+  - 301 会抓取定向后的 并保存新网址
+  - 302 会抓取定向后的内容 但是还会将网址保存为原网址
+  - 安全问题 302会保存原有地址， 可能出现网址劫持 
+  - 307 临时重定向
+  - 308 永久重定向
 
 
 ##### 重定向 相关
@@ -88,39 +86,40 @@ server {
 #### header
 
 常见 http header:
-1. Accept: 接收内容类型， 如 text/plain,text/html
+- Accept: 接收内容类型， 如 text/plain,text/html
   - Accept-Charset
   - Accept-Encoding
   - Accept-Language
-2. Authorization: web服务器 身份验证信息
-3. Access-Control-Allow CORS跨越使用
+- Authorization: web服务器 身份验证信息
+- Access-Control-Allow CORS跨越使用
   - *-Headers
   - *-Methods
   - *-Origin
   - *-Headers
-4. cache-Control 强缓存
-  - no-cache 能缓存，但是需要跟web服务器验证后才有效
+- cache-Control 强缓存
+  - no-cache 能缓存，但是需要跟web服务器验证后才有效 ???
   - no-store  不允许缓存
   - public 任何人都可以缓存
   - private 只能被用户缓存，不能被代理服务器缓存
   - max-age=seconds 设置缓存的最大周期
   - s-max-age=seconds 代理端缓存， 私有缓存会忽略
-5. connection 控制当前网络连接状态
+- connection 控制当前网络连接状态
   - close
   - keep-alive
-6. content-type 指示资源的原始媒体类型
+- content-type 指示资源的原始媒体类型
   - 媒体类型 MIME
     - text/html
     - application/x-www-form-urlencoded
     - multipart/form-data
-7. cookie
-8. ETag/If-None-Match
-9. Last-Modified/If-Modified-Since `Last-Modified: Wed, 21 Oct 2015 07:28:00 GMT`
-10. Expires=http-date 相应过期日期/时间
-11. keep-alive 连接状态，可用来设置超时时长和最大请求数
-12. Location 重定向使用
-13. range 告知服务器返回文件的哪部分
-14. referer 当前请求页面的来源页地址
+- cookie
+- ETag/If-None-Match
+- Last-Modified/If-Modified-Since
+  - `Last-Modified: Wed, 21 Oct 2015 07:28:00 GMT`
+- Expires=http-date 相应过期日期/时间
+- keep-alive 连接状态，可用来设置超时时长和最大请求数
+- Location 重定向使用
+- range 告知服务器返回文件的哪部分
+- referer 当前请求页面的来源页地址
 
 
 #### method
@@ -134,13 +133,13 @@ server {
 
 
 常见问题：
-1. get & post
+- get & post
   - 语义
   - 参数传递方式
   - 传输数据大小
   - 安全
   - 缓存
-2. post 编码格式 即 Content-Type 可查http-header
+- post 编码格式 即 Content-Type 可查http-header
 
 #### cache
 
@@ -167,12 +166,12 @@ HTTP-Header:  Last-Modified < ETag
 etag生成:
   - 静态文件, 时间戳+文件大小的16进制
   - buffer字符串， 长度+对应的hash
-no-cache、no-store 的区别
 
-no-cache 和 no-store 这两个指令在请求和响应中都可以使用
-no-store 是真正的不进行任何缓存，告知服务器和缓存服务器，我请求、响应的内容里有机密信息；
-当 no-cache 在请求头中被使用时，表示强制使用协商缓存
-当 no-cache 在响应头中被返回时，表示缓存服务器不能对资源进行缓存，客户端可以缓存资源，但每次使用缓存资源前都必须先向服务器确认其有效性
+*no-cache、no-store 的区别*  
+  - no-cache 和 no-store 这两个指令在请求和响应中都可以使用
+  - no-store 是真正的不进行任何缓存，告知服务器和缓存服务器，我请求、响应的内容里有机密信息；
+  - 当 no-cache 在请求头中被使用时，表示强制使用协商缓存
+  - 当 no-cache 在响应头中被返回时，表示缓存服务器不能对资源进行缓存，客户端可以缓存资源，但每次使用缓存资源前都必须先向服务器确认其有效性
 
 
 启发式缓存:
@@ -182,12 +181,12 @@ no-store 是真正的不进行任何缓存，告知服务器和缓存服务器�
 ### cookie
 
 常见字段:
-- value 如果用于保存用户登录态，应该将该值加密，不能使用明文的用户标识
-- http-only  不能通过 JS 访问 Cookie，减少 XSS 攻击
-- secure 只能在协议为 HTTPS 的请求中携带
-- same-site 规定浏览器不能在跨域请求中携带 Cookie，减少 CSRF 攻击
-- expires
-- max-age 时间戳
+  - value 如果用于保存用户登录态，应该将该值加密，不能使用明文的用户标识
+  - http-only  不能通过 JS 访问 Cookie，减少 XSS 攻击
+  - secure 只能在协议为 HTTPS 的请求中携带
+  - same-site 规定浏览器不能在跨域请求中携带 Cookie，减少 CSRF 攻击
+  - expires
+  - max-age 时间戳
 
 ### HTTP/1.1
 
