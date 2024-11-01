@@ -24,6 +24,9 @@ demo:
     - 对histroyAPI中back forward go等方法的访问
 在不刷新页面的情况下， 实现界面的局部内容替换
 
+```js
+  window.addEventListener('popstate', () =>{})
+```
 
 使用 `onpopstate` 监听history路由的变化
 但是只能监听到 history.go forward back. 无法监听到pushState

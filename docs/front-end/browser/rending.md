@@ -171,12 +171,11 @@ https://segmentfault.com/a/1190000023609412
 
 ### 解决方案
 
-- 对 DOM 进行批量写入和读取（通过虚拟 DOM 或者 DocumentFragment 实现）。
-- 避免对样式频繁操作，了解常用样式属性触发 Layout / Paint / Composite 的机制，合理使用样式。
-- 合理利用特殊样式属性（如 transform: translateZ(0) 或者 will-change），将渲染层提升为合成层，开启 GPU 加速，提高页面性能。
-- 使用变量对布局信息（如 clientTop）进行缓存，避免因频繁读取布局信息而触发重排和重绘。
-- 需要多次重排的元素 positon 为absolute fixed， 脱离文档流，就不回影响其他元素
-- display none
+- dom 批量写入和读取 或者vnode documentfragment
+- css 
+  - 动画效果使用c3，将渲染层提升为合成层，开启 GPU 加速，提高页面性能
+  - 避免使用复杂选择器
+  - 限制重排范围 需要多次重排的元素 positon 为absolute fixed， 脱离文档流，就不回影响其他元素
 
 
 ### 为什么操作dom 慢

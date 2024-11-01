@@ -7,7 +7,7 @@
 只能在函数内部使用，总指向调用它的对象（运行时绑定）  
 
 根据上下文不同，this的指向不同:
-  - 全局函数执行上下文 this指向window
+  - 全局函数执行上下文 this指向window(严格模式undefined)
   - 函数执行上下文
     - 直接调用 指向调用的函数
     - call apply 指向绑定的对象
@@ -50,9 +50,9 @@
     //示例1
     console.log(foo.bar());
     //示例2
-    console.log((foo.bar)());  // (foo.bar) 未重新计算
+    console.log((foo.bar)());  // (foo.bar) 未重新计算 2
     //示例3
-    console.log((foo.bar = foo.bar)()); // 已重新计算 
+    console.log((foo.bar = foo.bar)()); // 已重新计算  1
     //示例4
     console.log((false || foo.bar)());
     //示例5

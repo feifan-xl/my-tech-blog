@@ -40,12 +40,12 @@ foo.bind({}).name // "bound foo"
 ### arrow function
 
 特性:
-    - 写法更加简洁 (关键字 return)
-    - 不会绑定关键字 this bind apply 之类的方法
-    - 无 arguments
-    - 不会干涉关键字 this super new.target(es6新增 检测函数或构造方法是否通过new运算符调用，返回一个指向构造方法或函数的引用)
-    - 没有构造函数: function 有 construct 和 函数属性 arrow 没有
-    - 不能用与 Generator 函数, 不能使用yield命令
+  - 写法更加简洁 (关键字 return)
+  - 不会绑定关键字 this bind apply 之类的方法
+  - 无 arguments
+  - 不会干涉关键字 this super new.target(es6新增 检测函数或构造方法是否通过new运算符调用，返回一个指向构造方法或函数的引用)
+  - 没有构造函数: function 有 construct 和 函数属性 arrow 没有
+  - 不能用与 Generator 函数, 不能使用yield命令
 
 
 #### this?
