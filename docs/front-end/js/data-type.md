@@ -282,6 +282,9 @@ myObj == 42
     Object.prototype.toString.call('') // '[object String]'
     Object.prototype.toString.call(2) // '[object Number]'
     Object.prototype.toString.call({}) // '[object Object]'
+    // '[object AsyncFunction]'
+    // '[object GeneratorFunction]'
+    // '[object Proxy]'
   ```
 
 *Object.prototype.toString.call(xx)* 实现原理

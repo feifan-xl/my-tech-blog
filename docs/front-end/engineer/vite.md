@@ -101,7 +101,7 @@ tip: vite默认只对 node_module 文件夹下的 .js .cjs进行转换, 其他cj
 
 ## rollup 
 
-模块打包器
+模块打包器: 本质上就是对文件的合并， 结合插件系统实现一些其他功能
 
   - scope-hosting
   - 一次输出多种格式

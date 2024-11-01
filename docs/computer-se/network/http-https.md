@@ -97,7 +97,7 @@ server {
   - *-Origin
   - *-Headers
 - cache-Control 强缓存
-  - no-cache 能缓存，但是需要跟web服务器验证后才有效 ???
+  - no-cache 强制客户端向服务器发起请求（禁用强缓存，可用协商缓存）
   - no-store  不允许缓存
   - public 任何人都可以缓存
   - private 只能被用户缓存，不能被代理服务器缓存
@@ -177,6 +177,8 @@ etag生成:
 启发式缓存:
 如果 Expires，Cache-Control: max-age，或 Cache-Control: s-maxage 都没有在响应头中出现，并且设置了Last-Modified时
 
+ETag 在标识前面加 W/ 前缀表示用弱比较算法（If-None-Match 本身就只用弱比较算法）。
+ETag 还可以配合 If-Match 检测当前请求是否为最新版本，若资源不匹配返回状态码 412 错误（If-Match 不加 W/ 时使用强比较算法）
 
 ### cookie
 
@@ -185,6 +187,9 @@ etag生成:
   - http-only  不能通过 JS 访问 Cookie，减少 XSS 攻击
   - secure 只能在协议为 HTTPS 的请求中携带
   - same-site 规定浏览器不能在跨域请求中携带 Cookie，减少 CSRF 攻击
+    - Strict：完全禁止第三方 Cookie。
+    - Lax：只允许链接、预加载请求和 GET 表单的场景下发送第三方 Cookie。
+    - None：关闭 SameSite 属性。
   - expires
   - max-age 时间戳
 
