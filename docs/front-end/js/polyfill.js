@@ -276,6 +276,7 @@ class Polyfill08 {
           }
         }
         await execute(0);
+        return ctx
       }
     }
 

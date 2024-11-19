@@ -100,6 +100,9 @@ sum:
     stateAsRefs.foo.value++
     console.log(state.foo) // 3
   ```
+6. toRef toRefs
+  - 原始值设置为响应式 ref
+  - 进行一层包装 解决结构后响应式丢失
 
 #### reative 
 

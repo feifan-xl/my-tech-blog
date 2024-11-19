@@ -89,6 +89,7 @@
 特殊函数，返回一个 `Intertor` 对象  
 通过 `function *` 来定义， 使用 `yield` 关键字暂停和恢复函数执行 
 
+yield表达式本身没有返回值，或者说总是返回undefined
 
 应用: 
   1. 部署 Interator 接口 

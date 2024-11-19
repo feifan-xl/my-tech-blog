@@ -110,6 +110,9 @@ tip: vite默认只对 node_module 文件夹下的 .js .cjs进行转换, 其他cj
     - 代码拆分 热更新(plugin)
     - 动态导入(v3支持cjs)
 
+- 动态导入 
+  - build 后为 import()
+  - 对于低版本浏览器可使用 system.js
 ### esbuild
 
 - 无代码分割 css处理

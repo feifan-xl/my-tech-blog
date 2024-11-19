@@ -2,9 +2,7 @@
 
 
 - FE
-  - html ✅
-    - tag and attribute ✅
-  - css ✅
+  - css
     - base
       - 盒模型: 所有的元素在渲染时都是一个矩形盒子
       - bfc 独立渲染区域 
@@ -13,16 +11,9 @@
           - html float不为node position绝对固定 
           - display: inline-block table-cell flex grid
           - overflow 不为 visible
-      - 三栏布局 ✅
-    - 工程化 ✅
-      - preprocess ✅
-      - css in js ✅
-    - 项目 ✅
-      - responsive ✅
-      - tailwind ✅
-  - js ✅
-    - base ✅
-      - 数据类型 ✅
+      - flex: 0 grow shrink basis
+  - js
+    - base
       - 执行上下文 js代码被解析和执行锁在的抽象环境
         - 分类 全局、函数、eval
         - 组成
@@ -59,10 +50,6 @@
         - new 执行构造函数，生对应的实例
           - 执行过程 创建空对象 绑定原型 this 返回新对象
       - this 创建执行上下文自动生成的一个对象，指代当前所处的上下文环境
-      - 异步 ✅
-      - code ✅
-        - polyfill ✅
-        - scence ✅
     - es6
       - async✅
       - class✅
@@ -83,16 +70,19 @@
         2. 新生代采用 Scavenge 算法快速回收  
         3. 而老生代通过 Mark-Sweep 和 Mark-Compact 策略优化内存管理  
         4. 结合并行 增量(间歇小量) 并发(后台)， 减少主线程挂起的时间，确保了 JavaScript 应用程序的高性能和低延迟
-    - js-runtime 编译原理 ✅
+    - js-runtime 编译原理
+      - 解析 AST 作用域
+      - 解释 字节码
+      - 编译
     - 渲染流程
       - 主要流程
-        1. PARSE：解析 HTML，构建 DOM 树。
-        2. STYLE：为每个节点计算最终的有效样式。
-        3. LAYOUT：为每个节点计算位置和大小等布局信息。
-        4. PAINT：绘制不同的盒子，为了避免不必要的重绘，将会分成多个层进行处理。
-        5. COMPOSITE & RENDER：将上述不同的层合成为一张位图，发送给 GPU，渲染到屏幕上
+        1. 解析 PARSE：解析 HTML，构建 DOM 树。
+        2. 样式计算 STYLE：为每个节点计算最终的有效样式。
+        3. 布局计算 LAYOUT：为每个节点计算位置和大小等布局信息。
+        4. 绘制 PAINT：绘制不同的盒子，为了避免不必要的重绘，将会分成多个层进行处理。
+        5. 合成渲染 COMPOSITE & RENDER：将上述不同的层合成为一张位图，发送给 GPU，渲染到屏幕上
       - 渲染性能优化
-        - 避免渲染过程中重绘重排(todo 除动画？)
+        - 避免渲染过程中重绘重排
           1. 适当的结构分层
           2. 动画使用c3
           3. 减少dom操作
@@ -118,8 +108,8 @@
     - 事件循环 异步操作的处理机制 
       - 浏览器 任务队列的方式 非阻塞的执行 
       - node 任务队列结合轮询的方式
-        - timers、i/o callbase、idle prepare
-        - poll、check、close
+        - timers、pending callbase(系统层面回调)、idle prepare
+        - poll(处理io)、check、close
     - cross-origin
       - 浏览器为了请求安全而引入的基于同源策略的安全特性
       - 只有同源的请求资源 才允许js完整访问其内容
@@ -139,10 +129,34 @@
     - webrtc 
   - framework
     - react
-      - fiber 架构
-      - hooks
+      - fiber 一个任务调和器， 通过时间分片、优先级可分配等 用于 提高渲染性能 和 可扩展 的一种架构
+        - 架构 
+          - schedule 调度器 时间切片 优先级
+          - 协调器 循环diff 可中断
+          - 渲染器  vdom ->dom
+        - 流程
+          - render 创建fiber diff 标记要执行的dom操作
+            - 双缓存架构，一份渲染当前帧， 一份计算下一帧
+              - 回退
+              - 支持异步渲染和中断，确保用户交互流畅
+          - commit 直接dom操作
+        - 优先级
+          - 每个工作单元完成后检查是否有更高优先级的任务
+          - 借助浏览器的时间切片和事件循环机制，React 实现了高效的任务打断和调度
+          - 有超时机制 避免被完全打断 
+      - 渲染流程: 核心就是fiber架构的执行流程
+      - hooks 钩子函数 管理置身状态
+        - 通过函数调用和闭包的机制来管理状态
       - 生命周期
+      - diff: 深度优先 同级比较 （链表结果，无法首尾diff）
       - ssr
+      - 18
+        - 并发模式
+        - 自动批处理
+        - suspense支持ssr
+      - useEffect useLayoutEffect
+        - dom渲染后 dom渲染树构建后还没有绘制
+        - 异步 同步
         
     - vue
       - 原理 
@@ -160,6 +174,7 @@
         - 为什么快: 减少了对 dom操作的次数
           - 直接访问dom属性 会导致重绘重排 开销大
           - diff结合批处理 将多次操作合并
+        - 兼容性
         - 
       - diff: 新旧 vdom tree 的比较算法
         - 简单策略
@@ -342,6 +357,7 @@
         - 对于js css 分别有不同处理方式， 由各自的loader进行处理 
       - 优化
         - 构建速度
+          - 缓存 范围 速度 
           1. 优化loader
             - 优化文件搜索范围 exclude排除node_module
             - 开启缓存 如bable-loader 
@@ -355,6 +371,7 @@
           5. 移除 externals:
           6. 启用缓存 v5 (通过模块活chunk的数据hash值作为标识)
         - 产物大小
+          - 压缩 减少内容
           1. 代码压缩  uglifyJS  pro默认开启 
           2. 按需加载 dynamic import/ require.ensure
           3. scope hoisting 合并公用模块，避免重复引用打包
@@ -440,8 +457,16 @@
         - cache
         - 多线程？ 未使用过 
 - cross platform
-  - h5 & JSBridge ✅
-  - mini program ✅
+  - 通信
+    - JSBridge  na 与h5间的桥梁， 双向通信的通道
+    - url sheme 拦截
+    - 拦截部分 浏览器window方法 
+  - mini program
+    - 双线程架构
+      - 性能
+        - 双线程并行 初始化快
+        - 无阻塞
+      - 安全 无法跳转 无法操作dom 无法使用bom
   <!-- - flutter  -->
 - CS
   - 基础 ✅
@@ -566,7 +591,40 @@
       - 适配器
 - topic
   - 性能优化
-    - 
+    - 指标
+      - fp/fcp tti longtask 具体到项目 加载性能 更新性能
+      - 加载性能
+        - 优化加载速度
+          - dns-prefetch http2 cdn
+          - 异步加载async 预加载preload
+        - 减少文件体积
+          - treeshaking
+          - 压缩混淆
+          - gzip
+        - 缓存 强 协商 service worker
+
+      - 更新性能
+        - 通用
+          - 合理的dom布局，
+          - 节流 / 防抖
+          - 懒加载
+          - 复杂计算web worker
+        - react
+          - 减少不必要的重新渲染
+            - 合理使用 useCallback useMemo
+            - 简化 props 来提高缓存命中率
+            - hooks 按需更新
+            - key属性
+            - 避免多层级的嵌套组件
+        - vue 框架本身做了很多优化， 通常不需要手动
+      - 不过开发中有些需要注意点
+        - v-for key属性
+        - props 计算属性等 
+        - 不必要的组件抽象
+    - 小程序
+      - 分包加载
+      - 数据更新优化  setData
+    - webpack
   - 渲染流程
 - project
   - package manage

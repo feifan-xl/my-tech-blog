@@ -33,9 +33,8 @@
     - 基于single-spa import-html-entry实现的， 
       - single-spa 子应用的调度, ihe 子应用的加载
       - 本身实现的sandbox
-        - 单实例 proxy 对window修改进行监听, 并记录, 卸载后根据此恢复
-        - 多实例 复制一个fakewindow, 每个微应用分配个fakewindow， 并使用个map记录存储和更新
-        - ie snapshot 对window做镜像浅拷贝, 存入hashmap, 在卸载后今天diff复原，diff的结果用于下次恢复快照
+        - proxy 对 window 进行拦截
+        - 快照模式， 浅拷贝做镜像， 然后卸载后 使用镜像还原
       - css 隔离
     - 
   3. web component
