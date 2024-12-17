@@ -28,6 +28,15 @@
 - nx
 
 
+工具	Turborepo	Rush	Nx	Lerna	Pnpm Workspace
+依赖管理	❌	✅	❌	❌	✅
+版本管理	❌	✅	❌	✅	❌
+增量构建	✅	✅	✅	❌	❌
+插件扩展	✅	✅	✅	❌	❌
+云端缓存	✅	✅	✅	❌	❌
+Stars	20.4K	4.9K	17K	34.3K	22.7K
+
+
 
 ### turborepo
 

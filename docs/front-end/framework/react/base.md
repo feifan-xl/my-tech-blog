@@ -17,12 +17,6 @@
 2. 一切都是组件
 3. 声明式ui
 
-fiber
-vdom
-diff
-hooks
-
-
 ## fiber
 
 定义: 
@@ -41,21 +35,24 @@ hooks
 4. 支持 render 返回多个元素
 5. 更好的 error bounday
 
-核心：
+核心 messageChannle
+
 1. RIC： window.requestIdelCallback()
+  - 兼容性
+  - tab 不稳定
 2. RAF: window.requestAnimationFrame()
+  - 定当选项卡处于后台时，相对于 requestAnimationFrame 或 setTimeout 消息事件受到何种程度的限制
 
 
 架构：
-  - schedule 调度器 
-    - 时间切片， 优先级调度
-  - reconciler 协调器
-    - 可中断循环diff 
-  - renderer 渲染器
-    - vdom 渲染成 dom
+- schedule 调度器 
+  - 时间切片， 优先级调度
+- reconciler 协调器
+  - 可中断循环diff 
+- renderer 渲染器
+  - vdom 渲染成 dom
 
   
-
 
 
 调度器的优先级:
@@ -66,58 +63,25 @@ hooks
   - Idle：最低优先级，可以被无限延迟，比如 console
 
 
+lane 模型
+  - 智能的处理并调度不同更新
+  - ric 都合并到微任务 
+
+
 
 更新流程:
   1. render 阶段: 构建 Fiber对象 (DFS)，构建链表，在链表中标记要执行的DOM操作，可中断
   2. commit 阶段: 根据构建好的链表进行DOM操作，不可中断
- 
 
-
-#### window.requestIdelCallback()
-浏览器空闲时段调用
-
-语法
-  ```js
-    window.requestIdelCallback(callback, ?options: {timeout})
-    callback(ideldeadline) // 返回当前帧剩余的空闲时间
-  ```
-1. 如果timeout 没有被调用， 将被放在事件循环中排队，
-2. 返回id， 用来被 cancelIdelCallback
-
-*执行时机*
-1. 按每帧时长进行 16.67ms(1s / 60)
-2. 如果当前帧没有变化，就回安排时长为50ms的空闲时间(50ms 被认为是瞬时 无感知)
-
-
-*注意事项*
-1. 避免在空闲中改变dom  
-  - 改变影响了布局，你可能会强制停止浏览器并重新计算
-
-
-#### Window.requestAnimationFrame
-
-将每一帧的所有dom操作都集中起来， 在下一次重排前执行 
-
-下次重绘前，执行回调 
-
-vs setTimeout:
-  1. 自动合并多个回调，避免不必要的开销。
-  2. 与浏览器的刷新同步，不会在浏览器页面不可见时执行回调
-  3. 由浏览器内部进行调度和优化，性能更高，消耗的CPU和GPU资源更少
-
-
-注意:
-1. 避免在requestAnimationFrame回调函数中进行大量计算
-  - 分批
-  - 优化
-  - 帧率控制
-  - webworker
-
-
-使用场景：
-  1. 数据的分析和上报
-  2. 预加载
-  3. 检查卡顿(开启一个worker，用来进行心跳检测)
+#### diff
+  - 16后 递归改剩迭代,
+  - 同级首节点比较
+  - 流程
+    - current 中同级fiber 保存 map中
+    - 遍历 newChild 找到对应elemtn
+    - 判断是插入还是移动
+    - map 中未标记的删除
+  - 通过key构建map， 然后使用newList来找对应oldList中的idx， 如果oldIdx > newIdx 不变， 否则移动 
 
 
 #### 双缓存策略
@@ -147,6 +111,14 @@ vs setTimeout:
   - 挂载 []
   - 更新 [dep]
   - 下载 return
+
+生命周期16
+- 移除 componentWillMount compoentWillReceive
+  - 会被意外多次调用
+- 新增 getDerivesedStateFromProps getSnapshotBeforeUpdate
+  - 替代被移除的
+- 修改 componentDidUpdate componentDidCatch
+  - 被使用在commit阶段， 异步渲染引入的新阶段
 
 ## hooks
 
@@ -267,9 +239,32 @@ v17.x+ 添加到渲染 react树的 根dom上
 
 ## 版本
 
+16
+  - errorboundary 子组件树任何错误
+  - ssr API 流式渲染
+17
+  - 事件代理 挂载到根dom容器
+  - 
+
 v18:
   - 正式支持并发模式: vnode更新一部分 就渲染一部分
   - 自动批处理： 处理 原生事件 timer promise等不会进行批处理的问题
+  - concurrent
+    - 一种新的渲染模式，在多个状态更新中进行时间切片，使得长时间运行的渲染不会阻塞主线程， 提高响应性
+    - useTransition
+      - 作用，高速react状态更新可能需要些时间
+        - ui创建中请求数据
+      - hook 返回值为数组
+        - 第一项 boolean 是否处于过度状态
+        - 二 函数，触发过度状态的更新
+        - 过渡状态时，可选择显式一共加载指示器或备用ui 
+    - useDeferredValue 控制一个受状态变化影响的值
+  - server components 
+  - 时间切片 -> 微任务+宏任务 why?
+
+### 状态撕裂
+  - 并发模式中，渲染优先级不同，导致应用中不同部分状态不一致
+  - useDeferredValue / useTransition 解决
 
 ## 组件通信
 
@@ -287,4 +282,95 @@ v18:
 - 合理使用reducer context
 
 ## ssr
+
+## 渲染流程
+1. 初始化
+  - 创建fiber节点 表示根组件
+  - 调用render方法，创建vdom
+2. 调度 Scheduler
+  - 决定合适执行更新任务
+  - 是否有高优先级，如用户交互
+  - 根据优先级将任务添加到不同 任务队列 lane 中
+3. 协调 Reconciler
+  - 取出任务，进行diff，双缓存
+4. 生命周期
+  - 协调 提交阶段
+  - componentDidMounte componentDidUpdate 
+5. 渲染阶段
+  - 根据组件状态变化 props等触发条件，执行函数体 或render方法
+  - 在这时，检测组件中是否包含hooks，根据顺序以此调用
+  - hooks 执行
+    - 批处理 setState合并， 18自动化批处理
+6. commit
+  - 进行页面渲染
+  - 生命周期 componentDidMounte componentDidUpdate
+7. 重复2-6
+
+## api
+
+
+
+1. hoc 本质是函数，接受一共组件做参数， 返回一个新的组件
+  - 用于增强组件复用性和可维护性
+  - 应用
+    - 权限
+    - 时间获取
+    - 错误处理  
+      - getDervedStateFromError 发生错误时 更新状态试用下一次渲染备用ui
+      - componentDidCatch 将错误日志上报给一共错误报告服务
+      - errorboundary 组件
+2. props 验证
+  - propsTypes
+  - ts React.FC
+
+
+## other
+
+
+
+#### window.requestIdelCallback()
+浏览器空闲时段调用
+
+语法
+  ```js
+    window.requestIdelCallback(callback, ?options: {timeout})
+    callback(ideldeadline) // 返回当前帧剩余的空闲时间
+  ```
+1. 如果timeout 没有被调用， 将被放在事件循环中排队，
+2. 返回id， 用来被 cancelIdelCallback
+
+*执行时机*
+1. 按每帧时长进行 16.67ms(1s / 60)
+2. 如果当前帧没有变化，就回安排时长为50ms的空闲时间(50ms 被认为是瞬时 无感知)
+
+
+*注意事项*
+1. 避免在空闲中改变dom  
+  - 改变影响了布局，你可能会强制停止浏览器并重新计算
+
+
+#### Window.requestAnimationFrame
+
+将每一帧的所有dom操作都集中起来， 在下一次重排前执行 
+
+下次重绘前，执行回调 
+
+vs setTimeout:
+  1. 自动合并多个回调，避免不必要的开销。
+  2. 与浏览器的刷新同步，不会在浏览器页面不可见时执行回调
+  3. 由浏览器内部进行调度和优化，性能更高，消耗的CPU和GPU资源更少
+
+
+注意:
+1. 避免在requestAnimationFrame回调函数中进行大量计算
+  - 分批
+  - 优化
+  - 帧率控制
+  - webworker
+
+
+使用场景：
+  1. 数据的分析和上报
+  2. 预加载
+  3. 检查卡顿(开启一个worker，用来进行心跳检测)
 

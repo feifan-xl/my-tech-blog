@@ -288,9 +288,11 @@ server push
 
 
 - 多路复用
+  - 通过stream id 的方式传输
 - 数据可靠
+  - 拥有重传机制 
 - 快速握手
-- TLS 加密
+  - 传输层协议  tls握手仅需一次rtt
 
 
 ## https

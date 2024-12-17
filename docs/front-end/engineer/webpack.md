@@ -31,6 +31,15 @@
 
 - Compiler 对象包含了 Webpack 环境所有的的配置信息，包含 options，loaders，plugins 这些信息，这个对象在 Webpack 启动时候被实例化，它是全局唯一的，可以简单地把它理解为 Webpack 实例
 - Compilation 对象包含了当前的模块资源、编译生成资源、变化的文件等 只是代表了一次新的编译
+- module 一个模块或者文件
+- chunk 一共代码块 多个模块的集合
+- loader
+- plugin
+- resolver 解析文件路径
+- filesystem
+- tapable 实现事件驱动的架构
+- template 
+- output
 
 ### loader/plugin
 
@@ -129,6 +138,14 @@ webpack只认识js和json， 因此最左侧的loader必须返回 js 或 json
 2. 异步模块加载
   - require.ensure()
   - importy().then()
+
+配置:
+  - chunks 'all' 'async' 'initial'
+  - minsize
+  - maxsize
+  - minchunks 最小引用次数
+  - priority 
+
 
 
 ### tree-shaking

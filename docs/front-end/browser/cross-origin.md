@@ -80,3 +80,9 @@ JSONP 的原理是利用了浏览器加载 JavaScript 资源文件时不受同�
 - Websocket 不受同源策略影响
 - webview调用scheme
   - 非标准浏览器发起的http请求，通过应用的特定接口处理 
+
+## iframe 跨域
+
+1.无法读取cookie、localStorage、indexDB
+2.DOM无法获得
+3.ajax请求无法发送

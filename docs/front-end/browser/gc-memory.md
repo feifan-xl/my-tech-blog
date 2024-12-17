@@ -97,12 +97,33 @@ V8 的堆内存分为两个主要区域：
 
 ### 常见的内存泄漏
 
-- 意外的全局变量
-- timer
-- DOM
-  - DOM 的引用
-  - DOM 属性的赋值
-  - 事件绑定没有解除
-- 闭包
-- 传递给console.log 的对象不能被回收
+浏览器：
+  - 意外的全局变量
+  - timer
+  - 未移除的事件监听
+  - DOM
+    - DOM 的引用
+    - DOM 属性的赋值
+    - 事件绑定没有解除
+  - 闭包
+  - 传递给console.log 的对象不能被回收
+  - webworker
 
+node:
+  - 缓存
+  - 全局变量
+  - 事件监听
+  - 闭包
+  - stream
+  - 外部资源 (数据库连接未释放)
+
+#### 分析工具
+  - chrome 
+    - devtools
+      - memory
+      - snapshot
+  - node
+    - process.memoryUsage()
+    - 堆快照
+    - 性能分析工具 node-memwatch
+  

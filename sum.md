@@ -50,18 +50,6 @@
         - new 执行构造函数，生对应的实例
           - 执行过程 创建空对象 绑定原型 this 返回新对象
       - this 创建执行上下文自动生成的一个对象，指代当前所处的上下文环境
-    - es6
-      - async✅
-      - class✅
-      - function & arrow function✅
-      - let & const ✅
-      - promise✅
-      - proxt and reflect ✅
-      - set & map ✅
-      - iterator & generator ✅
-      - esm✅
-      - widget ✔️
-      - object ✔️
   - browser
     - gc 内存自动管理机制 自动回收分配给程序的已经不再使用的内存
       - 常见的 GC 算法有引用计数法和标记清除法
@@ -104,7 +92,25 @@
             - 避免使用复杂选择器
             - 限制重排范围 需要多次重排的元素 positon 为absolute fixed， 脱离文档流，就不回影响其他元素
       - 
-    - chromium
+    - 多进程多线程
+      - 主进程 负责界面显示、用户交互、子进程管理等
+      - 多渲染进程 tab
+        - 渲染线程
+          + 负责渲染浏览器界面
+          + 当界面需要重绘
+          + 与JS线程互斥
+        - JS引擎线程
+          + 通过js
+          + 与 GUI 进程互斥
+        - 事件触发线程
+          + 控制事件循环
+          + 如setTimeOut时（也可来自浏览器内核的其他线程,如鼠标点击、AJAX异步请求等），会将对应任务添加到事件线程中
+        - 定时器触发线程
+          + setTimeout 计数
+          + setInterval 计数
+        - 异步http请求线程
+          + XMLHttpRequest
+      - 插件 网络
     - 事件循环 异步操作的处理机制 
       - 浏览器 任务队列的方式 非阻塞的执行 
       - node 任务队列结合轮询的方式
@@ -123,10 +129,6 @@
         - 反向代理
         - jsonp
         - other postmessge
-    - iframe
-    - web component
-    - webAssembly
-    - webrtc 
   - framework
     - react
       - fiber 一个任务调和器， 通过时间分片、优先级可分配等 用于 提高渲染性能 和 可扩展 的一种架构
@@ -140,23 +142,57 @@
               - 回退
               - 支持异步渲染和中断，确保用户交互流畅
           - commit 直接dom操作
+            - before commit 执行dom操作前
+              - useEffect 相关处理
+            - mutation 执行dom操作
+            - layout 执行操作后
+              - 遍历执行commitlayouteffect
+              - 解绑ref， 切换fiber树
         - 优先级
           - 每个工作单元完成后检查是否有更高优先级的任务
           - 借助浏览器的时间切片和事件循环机制，React 实现了高效的任务打断和调度
           - 有超时机制 避免被完全打断 
       - 渲染流程: 核心就是fiber架构的执行流程
+        - 初始化: 创建fiber节点 表示根组件 调用render创建vdom
+        - 调度: 根据优先级将任务添加到不同 任务队列 lane 中，
+        - 协调: 任务队列中选择适合的任务执行， diff 双缓存
+        - 渲染: 据组件状态变化 props等触发条件，执行函数体 或render方法
       - hooks 钩子函数 管理置身状态
         - 通过函数调用和闭包的机制来管理状态
       - 生命周期
-      - diff: 深度优先 同级比较 （链表结果，无法首尾diff）
-      - ssr
-      - 18
-        - 并发模式
-        - 自动批处理
-        - suspense支持ssr
+        - 挂载
+          - *constructor*
+          - getDerivedStateFromProps
+          - *render*
+          - *componentDidMount*
+        - 更新
+          - getDerivedStateFromProps
+          - shouldComponentUpdate
+          - *render*
+          - getSnapshotBeforeUpdate
+          - *componentDidUpdate*
+        - 卸载
+          - *componentWillUnmount*
       - useEffect useLayoutEffect
         - dom渲染后 dom渲染树构建后还没有绘制
         - 异步 同步
+      - diff: 深度优先 同级比较 （链表结果，无法首尾diff）
+      - ssr
+      - 17 事件代理挂载到根dom上
+      - 18
+        - 并发模式: 渲染模式，在多个状态更新中进行时间分片，得长时间运行的渲染不会阻塞主线程， 提高响应性
+          - useTransition
+            - 作用，高速react状态更新可能需要些时间
+              - ui创建中请求数据
+            - hook 返回值为数组
+              - 第一项 boolean 是否处于过度状态
+              - 二 函数，触发过度状态的更新
+              - 过渡状态时，可选择显式一共加载指示器或备用ui 
+          - useDeferredValue 控制一个受状态变化影响的值
+          - 状态撕裂: 渲染优先级不同，导致应用中不同部分状态不一致
+        - 自动批处理
+        - server compon
+        - suspense支持ssr
         
     - vue
       - 原理 
@@ -169,12 +205,13 @@
           - 通过 v-model 实现， 是v-bind:xx v-on:xx 的语法糖
           - 当触发元素对应的事件(input, change等) 时更新数据
           - 当数据更新时同步到元素对应的属性上
-      - vnode
-        - 通过 js 对象模拟真实dom结构， 以减少直接操作dom的开销
-        - 为什么快: 减少了对 dom操作的次数
-          - 直接访问dom属性 会导致重绘重排 开销大
-          - diff结合批处理 将多次操作合并
-        - 兼容性
+      - vdom
+        - 性能： 通过 js 对象模拟真实dom结构， 以减少直接操作dom的开销
+          - 为什么快: 减少了对 dom操作的次数
+            - 直接访问dom属性 会导致重绘重排 开销大
+            - diff结合批处理 将多次操作合并
+        - 开发体验：声明式 组件化
+        - 跨平台：抽象出一个vdom层，以便处理不同平台兼容性
         - 
       - diff: 新旧 vdom tree 的比较算法
         - 简单策略
@@ -195,14 +232,22 @@
           - 依赖收集: 在访问数据时 会收集相应的副作用函数
           - 依赖触发： 在数据修改时，执行已收集的副作用函数， 以到达依赖追踪和自动更新
         - reactive ref
-          - reactive 对整个对象的代理
-            - 相应丢失: 赋值结构后 丢失了响应式
-              - 使用toRef解决
-          - ref 本质上是对reactive的封装 包裹对象
+          - reactive 创建一个响应式对象，对整个对象的代理
+            - 对原始数据类型无效
+              - 相应丢失: 赋值结构后 丢失了响应式
+                - 使用toRef解决
+            - 给响应式对象重新赋值会丢失响应式连接
+          - ref 将原始数据类型转为有响应式特性的数据类型
+            - 本质上是对reactive的封装 包裹对象
             - 如果是引用类型 不变
             - 简单类型， .value 去封装
-          - 自动脱 ref: 在template模板上使用ref， 不需要调用.value
-            - 编译时，setup函数返回的 ref函数再进行一次 proxy，返回值是 .value
+            - 自动脱 ref: 在template模板上使用顶层属性ref， 不需要调用.value
+              - 编译时，setup函数返回的 ref函数再进行一次 proxy，返回值是 .value(方便?)
+          - shadowRef / shadowReactive
+            - ref 可以被赋值为对象，然后会被reactive转为有较深层次的响应式对象。如果不想被深层解包
+        - toRef toRefs
+          - reactive对象中的某个属性转换为ref变量，并与原属性保持同步。如果该属性在原对象上不存在，会创建出一个新的ref变量
+          - 将一个响应式对象转换为一个普通对象，该对象的每个属性都是独立的ref
         - watch watchEffect
           - watch 作用是对传入的某个或多个值的变化进行监听
             - 支持 deep 和 immediate
@@ -215,7 +260,7 @@
         - 3 与2 区别
           - 新特性
             - 更快
-              - 响应式系统提升
+              - 响应式系统提升 
               - 编译优化 (diff算法优化)
             - 更小
               - 结构重构 基于ESM 支持tree-shaking 
@@ -234,6 +279,7 @@
             - 可以监听数组索引和length
             - 性能提升 对象嵌套属性只代理第一层，运行时递归，用到时才代理
           - 编译优化
+            - 静态标记 只会对比有静态标记的节点
             - 静态提升 静态节点会被提升到 render 外
             - slot 编译优化， 非动态 slot 属性的更新 只会触发子组件更新
               - 2.0 中父组件更新 slot会强制update
@@ -248,7 +294,10 @@
           - fragmen
             - vue2 基于snabbdom， 为了提高diff 效率， 每个组件是一个vnode， 只有一个节点
             - vue3 重写vdom， 每个组件对应的vnode数量就不那么重要了
-        - 
+        - composition API
+          - 更多的逻辑复用
+          - 更好的的组织代码
+          - 类型推导
       - 同构: 应用在服务器和客户端同时渲染的技术
         - 流程
           - 服务端使用vue组件生成html，将预取的数据与html一同返回给客户端
@@ -261,11 +310,6 @@
           - 跨平台api 如 xhr/http 可使用axios
           - 状态污染
             - 模块级别的全局变量，在node中多次执行 
-      
-      - 生态
-        - router
-          - 
-        - pinia & vuex
     - react and vue
       - 相同
         - 视图层框架，数据驱动视图的思想
@@ -279,6 +323,16 @@
         - 开发体验上 便捷 / 灵活度高
         - 性能优化 框架本身做了很多优化，  需手动优化 
         - 使用场景: 小型 / 大型   社区、灵活度
+      - hooks
+        - 设计理念
+          - 函数式编程，通过hooks来管理组件自身的状态，以达到组件复用、状态管理等目的
+          - 是对原有api的优化，通过comapi来使代码更加模块化，易于复用和维护
+        - 使用方式
+          - 通过链表形式，组件每次更新都会重新调用，所以只能在顶层调用
+          - 通过setup引入，无需考虑使用调用顺序 
+        - 优化策略
+          - 每次更新都会重新调用，需要手动进行优化， useCallback useMemo
+          - 基于响应式系统自动进行，绝大部分情况开发无需关注
     - svelte
     - next & nuxt
   - ts
@@ -355,13 +409,14 @@
           - 当编译文件变化时， 推送更新, 带上构建时的hash
           - 客户端的运行时，比对hash,发起请求获取更改内容, 通过jsonp获取增量更新,使用内存文件系统去替换有修改的内容
         - 对于js css 分别有不同处理方式， 由各自的loader进行处理 
-      - 优化
+      - 优化 优化构建过程 减少构建时间 提高性能
         - 构建速度
           - 缓存 范围 速度 
           1. 优化loader
             - 优化文件搜索范围 exclude排除node_module
             - 开启缓存 如bable-loader 
             - 并行执行loader  thread-loader
+            - swc-load
           2. dllplugin 将特定的类库提前打包然后引入， 主要用于类库打包 将公共代码抽离成单独文件 
           3. 文件路径优化
             - resolve.alias 映射别名  加快路径查找
@@ -369,7 +424,10 @@
             - 避免层层查找
           4.  webpack-uglify-parallel  多核并行压缩
           5. 移除 externals:
-          6. 启用缓存 v5 (通过模块活chunk的数据hash值作为标识)
+          6. 使用持久化缓存， 通过缓存模块和生成的代码块，在构建时重复使用，减少构建时间  (通过模块活chunk的数据hash值作为标识)
+          7. 最小化入口点: 减少入口点数量(模块化 微前端)
+          8. 代码拆分 懒加载
+          9. 通过 webpack-bundle-analyzer 或 speed-measure-webpack-plugin 分析和监控构建过程
         - 产物大小
           - 压缩 减少内容
           1. 代码压缩  uglifyJS  pro默认开启 
@@ -391,6 +449,10 @@
           - export default 之前会被认为必使用， 现在会做更优的判断
           - 嵌套的 tree-shaking， 跟踪对导出的嵌套属性的访问
         3. 持久化缓存: 确定的 chunk 模块id 导出名称 
+    - vite vs webpack
+      - 定位
+      - 特点
+        - 强大的模块打包和代码拆分能力，丰富的生态，高度的可定制化
     - vite 为开发提供极速响应的现代前端构建工具
       - 特点
         - 快速启动 no bundle + es build 进行预构建
@@ -439,13 +501,19 @@
           - esm
           - external 部分使用cdn
           - 路由懒加载
-    - babel js编译器，将高版本的转译为低版本的
+    - babel js编译器，将高版本的转译为低版本的 插件？
       - ast 抽象语法树 以树的形式来表现编程语言的语法结构
       - 编译流程: 先转换为 AST, 对 AST 应用各种插件进行处理， 最终输出编译后的js代码
         1. 解析 string -> token -> AST
         2. 转译 对 AST 进行 dfs, 调用插件处理相关节点
         3. 生成
       -  plugin preset
+    - swc js ts 转译压缩工具
+      - rust 高效
+      - 并行处理能力
+      - 更低的资源消耗 更少的内存和cpu
+      - 内置ts
+      - 注意: 插件生态(未支持)，迁移和兼容性
     - rollup 模块打包器， 本质上就是对文件合并
       - 特点：
         - 文档精简
@@ -467,16 +535,12 @@
         - 双线程并行 初始化快
         - 无阻塞
       - 安全 无法跳转 无法操作dom 无法使用bom
-  <!-- - flutter  -->
 - CS
-  - 基础 ✅
-    - 线程、进程 ✅
-  - 网络✅
+  - 网络
     - base
-      - 五层模型✅
     - tcp & udp
       - tcp
-        - 可靠性
+        - 可靠性 连接管理
           - 三次握手
             1. 客户端发起请求， 包含 syn 标志位1 随机序列号 seq 客户端进入`SYN_SENT`状态
             2. 服务端接收，开启一个socket端口， 返回syn=1 ACK=1 随机序列号 确认号seq+1 进入`SYN_RCVD`等待
@@ -487,13 +551,25 @@
             3. 发送完所有文件后， 发送 FIN=1, 进入`LAST_CK`
             4. 客户端接收后发送确认， 2msl后自动关闭， 服务端接收后直接关闭
           - 数据包序列号 & 确认应答机制
+            - 去重 按顺序接收 确认是否已传
           - 重传机制
-          - 流量控制
-          - 拥塞机制
-        - 缺陷
+            - 超时 快速 sack
+          - 流量控制: 滑动窗口 最大化传输效率
+          - 拥塞机制: 控制发送频率，防止数据充满网络
+            - 慢启动 窗口大小指数增长
+            - 避免拥塞: 超过`慢启动门限`限度后， 变成线性
+            - 拥塞发生: 超时重传降为1，快速减半
+            - 快速恢复
+        - 缺陷: 握手时间 队头阻塞 网络迁移重建连接
+      - keepalive 包活机制 / 管道化
       - udp
-        <!-- - todo -->
-      - 区别
+        - 用户数据报协议 
+        - 面向报文 字节流  
+        - 连接 无连接
+        - 可靠
+        - 速度
+        - 1对1 
+        - 流量控制与拥塞
     - http
       - base
         - status code
@@ -512,23 +588,29 @@
           - lastModify/if-modify-since
       - diff version
         - v_1.1
-          - 持久连接
-          - 管道化传输
-          - 分块编码传输
+          - 持久连接 一个tcp中发送接收到个
+          - 管道化传输 同时发送头部，按顺序返回信息
+          - 分块编码传输 tansfer-encoding:chunk
           - 新增host字段
           - 引入协商缓存机制
         - v_2
-          - 多路复用
-          - 头部压缩
+          - 多路复用 单tcp多个http
+          - 头部压缩 hpack 索引表
           - 二进制格式
-          - 数据流传输
+          - 数据流传输 streamID
           - 服务端推送
-        - v_3
-          <!-- - todo -->
+        - v_3 基于UDP 实现QUIC
+          - 无队头阻塞: 丢包只会阻塞流
+          - 多路复用
+          - 数据可靠 重传机制
+          - 快速握手 tls 仅需一个rtt
     - https
-      - diff with http
+      - diff with http 安全，证书，端口
       - 证书颁发
+        - 内容 持有者公钥 用途 有效期 颁发机构
+        - 对内容hash生成签名
       - 证书验证
+        - 取出颁发机构的公钥对签名解密 === hash
       - TLS 握手
         1. 客户端，TLS版本号，支持的密码套件列表 随机数
         2. 确认TLS版本号 选择一个密码套件，生成一个随机数
@@ -541,7 +623,8 @@
         4. 服务器验证 
           - 发送通知 告知后续开始加密
           - 用会话秘钥加密，发送 Finishd 信号 
-
+      - tls ssl 都是用于加密数据的通信协议，tls为后继者
+        - 握手流程少，加密算法高级 
     - RPC
     - websocket
     - cdn
@@ -580,19 +663,10 @@
       - http 网络劫持
       - CDN 劫持
       - SSL 剥离
-  - 设计模式
-    - 设计原则 SOLID
-    - 创建型
-      - 工厂
-      - 单例
-    - 行为性
-      - 订阅发版
-      - 装饰器
-      - 适配器
 - topic
   - 性能优化
     - 指标
-      - fp/fcp tti longtask 具体到项目 加载性能 更新性能
+      - fcp lcp fid
       - 加载性能
         - 优化加载速度
           - dns-prefetch http2 cdn
@@ -602,8 +676,8 @@
           - 压缩混淆
           - gzip
         - 缓存 强 协商 service worker
-
       - 更新性能
+        - web worker
         - 通用
           - 合理的dom布局，
           - 节流 / 防抖
@@ -616,36 +690,41 @@
             - hooks 按需更新
             - key属性
             - 避免多层级的嵌套组件
-        - vue 框架本身做了很多优化， 通常不需要手动
+        - vue 框架本身做了很多优化， 通常不需要手动，合理使用api就好
+          - 避免大数据量的reactive
+          - v-for 的key
+          - keep alive
       - 不过开发中有些需要注意点
         - v-for key属性
         - props 计算属性等 
         - 不必要的组件抽象
-    - 小程序
-      - 分包加载
-      - 数据更新优化  setData
+    - 针对特定平台
+      - webview 启动时间 
+      - 小程序
+        - 分包加载
+        - 数据更新优化  setData
     - webpack
   - 渲染流程
 - project
   - package manage
     - monorepo & multirepo
-    - lerna
-    - workspace
-    - pnpm
+    - lerna pnpm (版本 依赖)
+    - nx turborepo 增量构建 缓存
   - oss: 一种认证机制，允许用户在一个地方登录后，访问多个应用系统时无需再次进行身份验证
   - 监控
     - 性能
     - 错误
     - 日志
-  - ssr
+  - ssr 服务端渲染
     - 原理: 利用服务端渲染组件并生成html的一种技术，主要是用来提高页加载速度和seo优化
     - 流程
       - 服务端
       - 客户端激活
         - 建立dom 与 vdom 之间的联系
         - 给dom 元素添加绑定事件
-  - webrtc
-  - lowcode
+  - ssg 静态站点生成
+  - isr 增量静态再生
+  - stream 流式渲染: 借助http分块传输机制，不断向浏览器传输内容，浏览器边接受边渲染 
   - micro fe
     - qiankun
       - sandbox
@@ -655,11 +734,4 @@
     - iframe
     - webpack5 module federation
     <!-- - 多方案 -->
-  - 
-- other
-  - gzip huffman + lz77
-    - lz77 将源文件中的重复字节 使用 长度、距离 对其进行替换，从而达到压缩的目的 
-  - sourcemap 压缩混淆后的代码与源码的映射
-    - 一般来说 source map 的应用都是在监控系统中，开发者构建完应用后，通过插件将源代码及 source map 上传至平台中。一旦客户端上报错误后，我们就可以通过该库来还原源代码的报错位置（具体 API 看文档即可），方便开发者快速定位线上问题。
-
 
