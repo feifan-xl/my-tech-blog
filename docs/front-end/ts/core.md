@@ -5,6 +5,8 @@
 2. interface / type
   - interface 是对对象的抽象，定义了属性和方法， 方便多个地方共享， 可以被类 对象 函数实现
   - type 相当于起了一个别名，便于在多处使用，它可以用于原始值、联合类型、交叉类型等
+    - 将函数 组合类型 工具类型等 抽离成一个单独完整的类型
+    - 进行封装后复用
 3. 泛型 
   - 是一种在定义函数、类或接口时使用类型参数的方式，以增加代码的灵活性和重用性
 4. 枚举和常量枚举？
@@ -233,8 +235,90 @@ type GetFirstParamType<T> = T extends ? (...args: infer R) => any ? R[0] : never
 
 ### 内置
 
-Exclude<T, U> -- 从T中剔除可以赋值给U的类型。
-Extract<T, U> -- 提取T中可以赋值给U的类型。
-NonNullable<T> -- 从T中剔除null和undefined。
-ReturnType<T> -- 获取函数返回值类型。
-InstanceType<T> -- 获取构造函数类型的实例类型。
+工具类型分类:
+  - 属性修饰
+    - 属性修饰
+      - partial
+      - required
+      - readonly
+    - 映射类型
+    - 索引类型 
+  - 结构工具
+    - 结构声明
+      - Record
+        ```ts
+          type Record<K extends keyof any, T> = {
+              [P in K]: T;
+          };
+        ```
+    - 结构处理
+      - Pick
+        ```ts
+          type Pick<T, K extends keyof T> = {
+              [P in K]: T[P];
+          };
+        ```
+      - Omit
+  - 集合工具
+     - ```type Extract<T, U> = T extends U ? T : never;```
+     - ```type Exclude<T, U> = T extends U ? never : T;```
+  - 模式匹配工具
+  - 模板字符串工具
+
+### 协变和逆变
+作用: 类型的描述更加灵活，尤其是泛型 
+
+协变: 子类型 可以 赋值个 父类型
+  - 如: 赋值  Parent = Person;
+  - 应用
+    - 赋值
+    - 函数返回值  子类 替代 父类
+
+
+逆变: 父类型 可以 赋值给 子类型
+  - 应用
+    - 函数参数 父类 替代 子类型 
+    ```ts
+        type Func = (a: 'ss') => string;
+        const func: Func = (a: string) => 'a';
+    ```
+
+双向协变: 既是协变 也是逆变  2.x后不允许 
+不变： 非父子类型 不会被继承 
+
+1. 怎么判断父子类型
+  - 结构类型系统 
+
+
+### 编译流程 
+
+tsc 编译流程
+  - scanner   -> token
+  - parser    -> ast
+  - binder    -> scoped
+  - checker   -> scoped and type
+  - transform -> modify
+  - emitter   -> sourcemap
+
+babel / tsc 
+1. 功能: 语法转换 / 语法转换+类型检查
+2. 输出: js / js 同时保持类型检查
+3. 场景:  
+  - 兼容js、减少构建时间
+  - 类型检查、完整的ts项目、生成类型声明文件 
+4. webpack
+  - ts-loader 本质上调用 tsc
+  - babel-loader 直接转译ts为js并删除 ts
+  
+### 声明 
+存放声明:
+  - lib: 内置， 如dom ts
+  - @types/xx:  运行环境api类型 如 node，  npm包的类型声明
+  - 开发者指定: include/exclude 文件
+
+声明方式:
+  - namespace 
+  - module
+  - esm 
+dts 类型声明默认全局 
+

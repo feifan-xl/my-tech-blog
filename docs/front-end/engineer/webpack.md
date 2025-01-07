@@ -345,6 +345,13 @@ setTimeout(() => {
   - export default 之前会被认为必使用， 现在会做更优的判断
   - 嵌套的 tree-shaking， 跟踪对导出的嵌套属性的访问
 3. 持久化缓存
+  - 原理
+    - 将构建结果缓存到本地文件系统
+    - 在下次执行构建时跳过一系列解析、链接、编译等非常消耗性能的操作，直接复用 module、chunk 的构建结果。
+  - 用法
+    - cache.type 'memory' | 'filesystem'，需要设置 filesystem 才能开启持久缓存
+    - cache.buildDependencies：额外的依赖文件，当这些文件内容发生变化时，缓存会完全失效而执行完整的编译构建，
+    - cache.managedPaths：受控目录，Webpack 构建时会跳过新旧代码哈希值与时间戳的对比，直接使用缓存副本，默认值为 ['./node_modules']
 
 
 ### 模块联邦 module federation
@@ -357,11 +364,6 @@ setTimeout(() => {
 - remote 引入其他应用 
 
 <!-- todo 对微前端架构的影响 -->
-
-
-
-### 持久化缓存 persistent caching
-确定的 chunk 模块id 导出名称 
 
 
 ### tree shaking

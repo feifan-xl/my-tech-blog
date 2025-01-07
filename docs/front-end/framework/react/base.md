@@ -87,9 +87,12 @@ lane 模型
 #### 双缓存策略
 
 用于管理更新阶段的一种机制  
-通过在内存中维护两份 UI 状态，一份用于渲染当前帧，另一份用于计算下一帧的状态
-避免了直接在 DOM 上进行更新操作，从而提高了流畅性
+- current tree 在当前展示的tree
+- workinprogress tree 为正在调和的tree， 如果相同就复用
 
+好处：
+  - 可中断 提高了流畅性
+  - 安全性，可回滚
 
 ## 生命周期
 
@@ -188,6 +191,7 @@ lane 模型
 - 浏览器渲染前， 同步执行 
 - 阻塞浏览器绘制
 
+场景: 初始化时出现闪烁
 ### useReducer
 
 将 useState 转换为 useReducer，处理多个state
@@ -240,17 +244,26 @@ v17.x+ 添加到渲染 react树的 根dom上
 ## 版本
 
 16
+  - 渲染
+    - 完整的渲染周期 批量更新
+    - 完全同步的渲染
+    - 无优先级 存在卡顿
   - errorboundary 子组件树任何错误
   - ssr API 流式渲染
 17
   - 事件代理 挂载到根dom容器
-  - 
+  - 渲染
+    - react.meno pursComponent
+    - useMemo useCallback
+    - lazy suspense
 
 v18:
   - 正式支持并发模式: vnode更新一部分 就渲染一部分
   - 自动批处理： 处理 原生事件 timer promise等不会进行批处理的问题
   - concurrent
     - 一种新的渲染模式，在多个状态更新中进行时间切片，使得长时间运行的渲染不会阻塞主线程， 提高响应性
+      - 可中断渲染: diff渲染拆分为小的异步任务
+      - 时间分片 
     - useTransition
       - 作用，高速react状态更新可能需要些时间
         - ui创建中请求数据
@@ -258,7 +271,14 @@ v18:
         - 第一项 boolean 是否处于过度状态
         - 二 函数，触发过度状态的更新
         - 过渡状态时，可选择显式一共加载指示器或备用ui 
-    - useDeferredValue 控制一个受状态变化影响的值
+    - useDeferredValue 控制状态以较低的优先级被调度
+    - 与 fiber 关系: fiber 提供了基础和支持
+    - 好处
+      - 提高界面的响应性 
+        - 
+  - suspense 支持 ssr -> 流式ssr
+    - 使用占位符格式占位
+    - 选择性注水， 尽早的对已就绪的页面注水
   - server components 
   - 时间切片 -> 微任务+宏任务 why?
 
